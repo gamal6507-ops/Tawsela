@@ -89,6 +89,6 @@ class FakeTripHistoryRepository implements TripHistoryRepository {
   @override
   Future<double> getTotalSpent() async {
     await Future.delayed(const Duration(milliseconds: 300));
-    return _trips.fold<double>(0.0, (sum, t) => sum + t.price);
+    return _trips.fold<double>(0.0, (total, t) => total + t.price);
   }
 }

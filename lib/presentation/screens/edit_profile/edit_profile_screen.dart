@@ -34,12 +34,18 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
 
   void _loadProfile() {
     final state = context.read<ProfileCubit>().state;
-    if (state is ProfileLoaded) {
-      _user = state.user;
-      _nameController.text = state.user.name;
-      _phoneController.text = state.user.phone;
-      _emailController.text = state.user.email;
-      _dateOfBirth = state.user.dateOfBirth;
+    final user =
+        state is ProfileLoaded
+            ? state.user
+            : state is ProfileSaved
+            ? state.user
+            : null;
+    if (user != null) {
+      _user = user;
+      _nameController.text = user.name;
+      _phoneController.text = user.phone;
+      _emailController.text = user.email;
+      _dateOfBirth = user.dateOfBirth;
     }
   }
 
@@ -53,12 +59,14 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
 
   void _save() {
     if (_formKey.currentState!.validate() && _user != null) {
-      context.read<ProfileCubit>().updateProfile(_user!.copyWith(
-        name: _nameController.text,
-        phone: _phoneController.text,
-        email: _emailController.text,
-        dateOfBirth: _dateOfBirth,
-      ));
+      context.read<ProfileCubit>().updateProfile(
+        _user!.copyWith(
+          name: _nameController.text,
+          phone: _phoneController.text,
+          email: _emailController.text,
+          dateOfBirth: _dateOfBirth,
+        ),
+      );
     }
   }
 
@@ -77,7 +85,10 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
           if (state is ProfileSaved) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
-                content: Text('تم حفظ التغييرات بنجاح', style: GoogleFonts.cairo()),
+                content: Text(
+                  'تم حفظ التغييرات بنجاح',
+                  style: GoogleFonts.cairo(),
+                ),
                 backgroundColor: AppColors.success,
               ),
             );
@@ -106,10 +117,18 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                       children: [
                         CircleAvatar(
                           radius: 50,
-                          backgroundColor: AppColors.accent.withValues(alpha: 0.2),
+                          backgroundColor: AppColors.accent.withValues(
+                            alpha: 0.2,
+                          ),
                           child: Text(
-                            _user?.name.isNotEmpty == true ? _user!.name[0] : '?',
-                            style: GoogleFonts.cairo(fontSize: 40, fontWeight: FontWeight.bold, color: AppColors.accent),
+                            _user?.name.isNotEmpty == true
+                                ? _user!.name[0]
+                                : '?',
+                            style: GoogleFonts.cairo(
+                              fontSize: 40,
+                              fontWeight: FontWeight.bold,
+                              color: AppColors.accent,
+                            ),
                           ),
                         ),
                         Container(
@@ -118,7 +137,11 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                             color: AppColors.accent,
                             shape: BoxShape.circle,
                           ),
-                          child: const Icon(Icons.camera_alt, size: 18, color: Colors.black),
+                          child: const Icon(
+                            Icons.camera_alt,
+                            size: 18,
+                            color: Colors.black,
+                          ),
                         ),
                       ],
                     ),
@@ -127,7 +150,9 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                       controller: _nameController,
                       label: 'الاسم',
                       icon: Icons.person_outline,
-                      validator: (val) => val == null || val.isEmpty ? 'الاسم مطلوب' : null,
+                      validator:
+                          (val) =>
+                              val == null || val.isEmpty ? 'الاسم مطلوب' : null,
                     ),
                     const SizedBox(height: 16),
                     _buildField(
@@ -136,7 +161,9 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                       icon: Icons.phone_outlined,
                       keyboardType: TextInputType.phone,
                       validator: (val) {
-                        if (val == null || val.isEmpty) return 'رقم التليفون مطلوب';
+                        if (val == null || val.isEmpty) {
+                          return 'رقم التليفون مطلوب';
+                        }
                         if (val.length < 10) return 'رقم التليفون غير صحيح';
                         return null;
                       },
@@ -145,6 +172,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                     _buildField(
                       controller: _emailController,
                       label: 'البريد الإلكتروني',
+                      readOnly: true,
                       icon: Icons.email_outlined,
                       keyboardType: TextInputType.emailAddress,
                       validator: (val) {
@@ -162,10 +190,15 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                           firstDate: DateTime(1950),
                           lastDate: DateTime.now(),
                         );
-                        if (picked != null) setState(() => _dateOfBirth = picked);
+                        if (picked != null) {
+                          setState(() => _dateOfBirth = picked);
+                        }
                       },
                       child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 20,
+                          vertical: 16,
+                        ),
                         decoration: BoxDecoration(
                           color: AppColors.cardBackground,
                           borderRadius: BorderRadius.circular(16),
@@ -173,7 +206,11 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                         ),
                         child: Row(
                           children: [
-                            const Icon(Icons.calendar_today, color: AppColors.textSecondary, size: 22),
+                            const Icon(
+                              Icons.calendar_today,
+                              color: AppColors.textSecondary,
+                              size: 22,
+                            ),
                             const SizedBox(width: 12),
                             Text(
                               _dateOfBirth != null
@@ -181,7 +218,10 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                                   : 'تاريخ الميلاد',
                               style: GoogleFonts.cairo(
                                 fontSize: 16,
-                                color: _dateOfBirth != null ? AppColors.textPrimary : AppColors.textTertiary,
+                                color:
+                                    _dateOfBirth != null
+                                        ? AppColors.textPrimary
+                                        : AppColors.textTertiary,
                               ),
                             ),
                           ],
@@ -214,9 +254,11 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     required IconData icon,
     String? Function(String?)? validator,
     TextInputType? keyboardType,
+    bool readOnly = false,
   }) {
     return TextFormField(
       controller: controller,
+      readOnly: readOnly,
       validator: validator,
       keyboardType: keyboardType,
       style: GoogleFonts.cairo(color: AppColors.textPrimary, fontSize: 16),

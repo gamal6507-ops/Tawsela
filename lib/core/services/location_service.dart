@@ -1,102 +1,77 @@
-import 'dart:ui' show Locale;
-import 'package:geocoding/geocoding.dart';
+import 'dart:convert';
+import 'package:flutter/foundation.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:latlong2/latlong.dart';
+import 'package:http/http.dart' as http;
+import 'fare_calculator.dart';
 
 class LocationService {
-  static const LatLng defaultCairoLocation = LatLng(30.0444, 31.2357);
-  static const LatLng egyptSouthWest = LatLng(22.0, 25.0);
-  static const LatLng egyptNorthEast = LatLng(31.7, 36.9);
-
-  Geocoding? _geocoding;
-  Geocoding get _geocoder =>
-      _geocoding ??= Geocoding(locale: const Locale('ar'));
-
-  /// Returns true if [point] lies within Egypt's geographic bounds.
-  bool isInsideEgypt(LatLng point) {
-    return point.latitude >= egyptSouthWest.latitude &&
-        point.latitude <= egyptNorthEast.latitude &&
-        point.longitude >= egyptSouthWest.longitude &&
-        point.longitude <= egyptNorthEast.longitude;
-  }
-
-  /// Requests location permission if needed and returns the current GPS position.
-  /// Falls back to Cairo center if location services, permissions, or Egypt bounds are unavailable.
+  static const defaultCairoLocation = LatLng(30.0444, 31.2357);
+  static const egyptSouthWest = LatLng(22, 25);
+  static const egyptNorthEast = LatLng(31.7, 36.9);
+  bool isInsideEgypt(LatLng point) =>
+      point.latitude >= 22 &&
+      point.latitude <= 31.7 &&
+      point.longitude >= 25 &&
+      point.longitude <= 36.9;
   Future<LatLng> getCurrentLocation() async {
-    try {
-      final serviceEnabled = await Geolocator.isLocationServiceEnabled();
-      if (!serviceEnabled) return defaultCairoLocation;
-
-      var permission = await Geolocator.checkPermission();
-      if (permission == LocationPermission.denied) {
-        permission = await Geolocator.requestPermission();
-      }
-      if (permission == LocationPermission.denied ||
-          permission == LocationPermission.deniedForever) {
-        return defaultCairoLocation;
-      }
-
-      final position = await Geolocator.getCurrentPosition(
-        locationSettings: const LocationSettings(
-          accuracy: LocationAccuracy.high,
-          timeLimit: Duration(seconds: 8),
-        ),
-      );
-      final current = LatLng(position.latitude, position.longitude);
-      return isInsideEgypt(current) ? current : defaultCairoLocation;
-    } catch (_) {
-      return defaultCairoLocation;
+    if (!await Geolocator.isLocationServiceEnabled()) {
+      throw StateError('فعّل خدمة الموقع أو حدد مكانك على الخريطة');
     }
+    var permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.denied) {
+      permission = await Geolocator.requestPermission();
+    }
+    if (permission == LocationPermission.denied ||
+        permission == LocationPermission.deniedForever) {
+      throw StateError('إذن الموقع غير متاح. حدد نقطة الانطلاق على الخريطة');
+    }
+    final position = await Geolocator.getCurrentPosition(
+      locationSettings: const LocationSettings(
+        accuracy: LocationAccuracy.high,
+        timeLimit: Duration(seconds: 10),
+      ),
+    );
+    final point = LatLng(position.latitude, position.longitude);
+    if (!isInsideEgypt(point)) {
+      throw StateError('الخدمة داخل نطاق مصر فقط. حدد المكان على الخريطة');
+    }
+    return point;
   }
 
-  /// Converts coordinates into a human-readable address.
-  Future<String> getAddressFromLatLng(LatLng point) async {
-    try {
-      final placemarks = await _geocoder.placemarkFromCoordinates(
-        point.latitude,
-        point.longitude,
-      );
-      if (placemarks.isNotEmpty) {
-        final p = placemarks.first;
-        final parts = <String>[
-          if (p.street != null && p.street!.isNotEmpty) p.street!,
-          if (p.subLocality != null && p.subLocality!.isNotEmpty) p.subLocality!,
-          if (p.locality != null && p.locality!.isNotEmpty) p.locality!,
-        ];
-        if (parts.isNotEmpty) {
-          return parts.take(2).join('، ');
-        }
-      }
-    } catch (_) {}
-    return '${point.latitude.toStringAsFixed(4)}, ${point.longitude.toStringAsFixed(4)}';
-  }
-
-  /// Resolves a text address inside Egypt into coordinates, returning null if not found.
+  Future<String> getAddressFromLatLng(LatLng point) async =>
+      '${point.latitude.toStringAsFixed(5)}, ${point.longitude.toStringAsFixed(5)}';
   Future<LatLng?> getLatLngFromAddress(String address) async {
-    try {
-      final query = address.contains('مصر') || address.toLowerCase().contains('egypt')
-          ? address
-          : '$address، مصر';
-      final locations = await _geocoder.locationFromAddress(query);
-      for (final loc in locations) {
-        final point = LatLng(loc.latitude, loc.longitude);
-        if (isInsideEgypt(point)) {
-          return point;
-        }
-      }
-    } catch (_) {}
+    final query = address.trim();
+    if (query.length < 3 || query.length > 200) return null;
+    final endpoint =
+        kIsWeb
+            ? Uri.base
+                .resolve('/api/geocode')
+                .replace(queryParameters: {'q': query})
+            : Uri.https('photon.komoot.io', '/api/', {
+              'q': query,
+              'bbox': '25,22,36.9,31.7',
+              'limit': '5',
+            });
+    final response = await http
+        .get(endpoint)
+        .timeout(const Duration(seconds: 10));
+    if (response.statusCode != 200) {
+      throw StateError('البحث غير متاح الآن. حدد المكان على الخريطة');
+    }
+    final body = jsonDecode(response.body) as Map<String, dynamic>;
+    for (final feature in body['features'] as List? ?? []) {
+      final coords = feature['geometry']['coordinates'] as List;
+      final point = LatLng(
+        (coords[1] as num).toDouble(),
+        (coords[0] as num).toDouble(),
+      );
+      if (isInsideEgypt(point)) return point;
+    }
     return null;
   }
 
-  /// Returns distance in kilometers between two coordinates (minimum 1.0 km).
-  double calculateDistanceKm(LatLng from, LatLng to) {
-    final meters = Geolocator.distanceBetween(
-      from.latitude,
-      from.longitude,
-      to.latitude,
-      to.longitude,
-    );
-    final km = meters / 1000.0;
-    return km < 1.0 ? 1.0 : double.parse(km.toStringAsFixed(1));
-  }
+  double calculateDistanceKm(LatLng from, LatLng to) =>
+      FareCalculator.distance(from, to);
 }

@@ -24,16 +24,19 @@ void main() {
     blocTest<RideBookingBloc, RideBookingState>(
       'emits SelectingRide with car selected by default when RideBookingStarted is added',
       build: () => RideBookingBloc(repository),
-      act: (bloc) => bloc.add(const RideBookingStarted(from: 'المول', to: 'البيت')),
+      act:
+          (bloc) =>
+              bloc.add(const RideBookingStarted(from: 'المول', to: 'البيت')),
       wait: const Duration(milliseconds: 600),
-      expect: () => [
-        isA<SelectingRide>()
-            .having((s) => s.from, 'from', 'المول')
-            .having((s) => s.to, 'to', 'البيت')
-            .having((s) => s.selectedType, 'selectedType', RideType.car)
-            .having((s) => s.selectedPrice, 'selectedPrice', 24)
-            .having((s) => s.rideOptions.length, 'options length', 3),
-      ],
+      expect:
+          () => [
+            isA<SelectingRide>()
+                .having((s) => s.from, 'from', 'المول')
+                .having((s) => s.to, 'to', 'البيت')
+                .having((s) => s.selectedType, 'selectedType', RideType.car)
+                .having((s) => s.selectedPrice, 'selectedPrice', 24)
+                .having((s) => s.rideOptions.length, 'options length', 3),
+          ],
     );
 
     blocTest<RideBookingBloc, RideBookingState>(
@@ -46,15 +49,32 @@ void main() {
         bloc.add(const PaymentMethodSelected(PaymentMethod.card));
       },
       wait: const Duration(milliseconds: 700),
-      expect: () => [
-        isA<SelectingRide>().having((s) => s.selectedType, 'selectedType', RideType.car),
-        isA<SelectingRide>()
-            .having((s) => s.selectedType, 'selectedType', RideType.motorcycle)
-            .having((s) => s.selectedPrice, 'selectedPrice', 12),
-        isA<SelectingRide>()
-            .having((s) => s.selectedType, 'selectedType', RideType.motorcycle)
-            .having((s) => s.selectedPayment, 'selectedPayment', PaymentMethod.card),
-      ],
+      expect:
+          () => [
+            isA<SelectingRide>().having(
+              (s) => s.selectedType,
+              'selectedType',
+              RideType.car,
+            ),
+            isA<SelectingRide>()
+                .having(
+                  (s) => s.selectedType,
+                  'selectedType',
+                  RideType.motorcycle,
+                )
+                .having((s) => s.selectedPrice, 'selectedPrice', 12),
+            isA<SelectingRide>()
+                .having(
+                  (s) => s.selectedType,
+                  'selectedType',
+                  RideType.motorcycle,
+                )
+                .having(
+                  (s) => s.selectedPayment,
+                  'selectedPayment',
+                  PaymentMethod.card,
+                ),
+          ],
     );
 
     blocTest<RideBookingBloc, RideBookingState>(
@@ -68,11 +88,17 @@ void main() {
         bloc.add(BookingCancelled());
       },
       wait: const Duration(seconds: 4),
-      expect: () => [
-        isA<SelectingRide>(),
-        isA<SearchingDriver>(),
-        isA<RideBookingInitial>(),
-      ],
+      expect:
+          () => [
+            isA<SelectingRide>(),
+            isA<SelectingRide>().having(
+              (s) => s.isSubmitting,
+              'submitting',
+              true,
+            ),
+            isA<SearchingDriver>(),
+            isA<RideBookingInitial>(),
+          ],
     );
   });
 }

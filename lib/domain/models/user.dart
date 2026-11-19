@@ -83,9 +83,9 @@ class User extends Equatable {
           map['dateOfBirth'] != null
               ? DateTime.fromMillisecondsSinceEpoch(map['dateOfBirth'] as int)
               : null,
-      rating: map['rating'] as double,
+      rating: (map['rating'] as num).toDouble(),
       totalTrips: map['totalTrips'] as int,
-      totalKm: map['totalKm'] as double,
+      totalKm: (map['totalKm'] as num).toDouble(),
     );
   }
 }

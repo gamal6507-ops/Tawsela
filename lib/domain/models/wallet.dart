@@ -21,7 +21,7 @@ class Wallet extends Equatable {
 
   factory Wallet.fromMap(Map<String, dynamic> map) {
     return Wallet(
-      balance: map['balance'] as double,
+      balance: (map['balance'] as num).toDouble(),
       currency: map['currency'] as String,
     );
   }

@@ -33,10 +33,38 @@ class ShellScreen extends StatelessWidget {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
-                _buildNavItem(context, 0, currentIndex, Icons.home_outlined, Icons.home_rounded, 'الرئيسية'),
-                _buildNavItem(context, 1, currentIndex, Icons.history_outlined, Icons.history_rounded, 'رحلاتي'),
-                _buildNavItem(context, 2, currentIndex, Icons.account_balance_wallet_outlined, Icons.account_balance_wallet_rounded, 'المحفظة'),
-                _buildNavItem(context, 3, currentIndex, Icons.person_outline_rounded, Icons.person_rounded, 'حسابي'),
+                _buildNavItem(
+                  context,
+                  0,
+                  currentIndex,
+                  Icons.home_outlined,
+                  Icons.home_rounded,
+                  'الرئيسية',
+                ),
+                _buildNavItem(
+                  context,
+                  1,
+                  currentIndex,
+                  Icons.history_outlined,
+                  Icons.history_rounded,
+                  'رحلاتي',
+                ),
+                _buildNavItem(
+                  context,
+                  2,
+                  currentIndex,
+                  Icons.payments_outlined,
+                  Icons.payments_rounded,
+                  'مدفوعاتي',
+                ),
+                _buildNavItem(
+                  context,
+                  3,
+                  currentIndex,
+                  Icons.person_outline_rounded,
+                  Icons.person_rounded,
+                  'حسابي',
+                ),
               ],
             ),
           ),
@@ -45,7 +73,14 @@ class ShellScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildNavItem(BuildContext context, int index, int currentIndex, IconData icon, IconData activeIcon, String label) {
+  Widget _buildNavItem(
+    BuildContext context,
+    int index,
+    int currentIndex,
+    IconData icon,
+    IconData activeIcon,
+    String label,
+  ) {
     final isActive = currentIndex == index;
     return GestureDetector(
       onTap: () {
@@ -64,12 +99,13 @@ class ShellScreen extends StatelessWidget {
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        decoration: isActive
-            ? BoxDecoration(
-                color: AppColors.accent.withValues(alpha: 0.15),
-                borderRadius: BorderRadius.circular(16),
-              )
-            : null,
+        decoration:
+            isActive
+                ? BoxDecoration(
+                  color: AppColors.accent.withValues(alpha: 0.15),
+                  borderRadius: BorderRadius.circular(16),
+                )
+                : null,
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [

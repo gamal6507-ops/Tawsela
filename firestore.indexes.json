@@ -1,0 +1,5 @@
+{"indexes":[
+ {"collectionGroup":"trips","queryScope":"COLLECTION","fields":[{"fieldPath":"userId","order":"ASCENDING"},{"fieldPath":"date","order":"DESCENDING"}]},
+ {"collectionGroup":"ride_requests","queryScope":"COLLECTION","fields":[{"fieldPath":"userId","order":"ASCENDING"},{"fieldPath":"createdAt","order":"DESCENDING"}]},
+ {"collectionGroup":"ride_requests","queryScope":"COLLECTION","fields":[{"fieldPath":"status","order":"ASCENDING"},{"fieldPath":"rideType","order":"ASCENDING"}]}
+],"fieldOverrides":[]}

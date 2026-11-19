@@ -48,7 +48,11 @@ class TransactionTile extends StatelessWidget {
               color: _colorForType(transaction.type).withValues(alpha: 0.15),
               shape: BoxShape.circle,
             ),
-            child: Icon(_iconForType(transaction.type), size: 20, color: _colorForType(transaction.type)),
+            child: Icon(
+              _iconForType(transaction.type),
+              size: 20,
+              color: _colorForType(transaction.type),
+            ),
           ),
           const SizedBox(width: 12),
           Expanded(
@@ -66,7 +70,10 @@ class TransactionTile extends StatelessWidget {
                 if (transaction.subtitle != null)
                   Text(
                     transaction.subtitle!,
-                    style: GoogleFonts.cairo(fontSize: 12, color: AppColors.textSecondary),
+                    style: GoogleFonts.cairo(
+                      fontSize: 12,
+                      color: AppColors.textSecondary,
+                    ),
                   ),
               ],
             ),
@@ -84,7 +91,10 @@ class TransactionTile extends StatelessWidget {
               ),
               Text(
                 DateFormat('MM/dd', 'ar').format(transaction.date),
-                style: GoogleFonts.cairo(fontSize: 11, color: AppColors.textTertiary),
+                style: GoogleFonts.cairo(
+                  fontSize: 11,
+                  color: AppColors.textTertiary,
+                ),
               ),
             ],
           ),

@@ -3,6 +3,7 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:toktok/core/services/location_service.dart';
 import 'package:toktok/core/theme/app_theme.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class TawselaMapWidget extends StatelessWidget {
   final LatLng center;
@@ -126,6 +127,17 @@ class TawselaMapWidget extends StatelessWidget {
             ),
             if (polylines.isNotEmpty) PolylineLayer(polylines: polylines),
             if (markers.isNotEmpty) MarkerLayer(markers: markers),
+            RichAttributionWidget(
+              attributions: [
+                TextSourceAttribution(
+                  'OpenStreetMap contributors',
+                  onTap:
+                      () => launchUrl(
+                        Uri.parse('https://www.openstreetmap.org/copyright'),
+                      ),
+                ),
+              ],
+            ),
           ],
         ),
       ),

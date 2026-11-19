@@ -4,7 +4,7 @@ import 'package:toktok/domain/models/ride.dart';
 import 'package:toktok/domain/models/trip.dart';
 import 'package:toktok/domain/repositories/ride_repository.dart';
 
-class FakeRideRepository implements RideRepository {
+class FakeRideRepository extends RideRepository {
   @override
   Future<List<RideOption>> getRideTypes({double? distanceKm}) async {
     await Future.delayed(const Duration(milliseconds: 500));
@@ -38,10 +38,7 @@ class FakeRideRepository implements RideRepository {
   }
 
   @override
-  Future<Driver> searchForDriver(
-    RideType type, {
-    String? requestId,
-  }) async {
+  Future<Driver> searchForDriver(RideType type, {String? requestId}) async {
     await Future.delayed(const Duration(seconds: 3));
     return const Driver(
       id: 'd1',

@@ -21,7 +21,12 @@ class WalletCubit extends Cubit<WalletState> {
   Future<void> topUp(double amount) async {
     final current = state is WalletLoaded ? (state as WalletLoaded) : null;
     if (current != null) {
-      emit(WalletToppingUp(wallet: current.wallet, transactions: current.transactions));
+      emit(
+        WalletToppingUp(
+          wallet: current.wallet,
+          transactions: current.transactions,
+        ),
+      );
     }
     try {
       final wallet = await _repository.topUp(amount);

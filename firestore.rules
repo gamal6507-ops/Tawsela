@@ -1,0 +1,174 @@
+rules_version = '2';
+// Prototype rules for the cash-only release; emulator tests accompany this file.
+// users/{uid}: name/phone/email strings, createdAt timestamp, optional avatarUrl/dateOfBirth.
+// drivers/{uid}: name/phone/plateNumber/vehicleType, approved bool (operator only),
+// isAvailable bool, activeRideId string|null, rating number (operator only).
+// active_rides/{uid}: requestId string; must point to the owner's active request.
+// ride_requests/{id}: immutable rider/coordinates/cash quote; driver-bound transitions.
+// trips/{requestId}: immutable receipt derived from the driver's arrived transition.
+// ratings/{tripId}: owner's 1..5 stars, bounded tags/comment, updatedAt timestamp.
+// users/{uid}/notification_states/{id}: isRead/hidden bools only.
+// ride_requests/{id}/messages/{id}: participant senderId, bounded text, sentAt timestamp.
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signed() { return request.auth != null; }
+    function owner(uid) { return signed() && request.auth.uid == uid; }
+    function driver(uid) { return get(/databases/$(database)/documents/drivers/$(uid)).data; }
+    function approved() { return signed() && driver(request.auth.uid).approved == true; }
+    function point(lat, lng) { return lat is number && lng is number && lat >= 22 && lat <= 31.7 && lng >= 25 && lng <= 36.9; }
+    function text(value, max) { return value is string && value.size() > 0 && value.size() <= max; }
+    function km(d) {
+      let north = (d.dropoffLat - d.pickupLat) * 111;
+      let east = (d.dropoffLng - d.pickupLng) * 96;
+      let rounded = math.ceil(math.sqrt(north * north + east * east) * 10) / 10.0;
+      return rounded < 1 ? 1.0 : rounded;
+    }
+    function fare(d) { return d.rideType == 'car' ? math.ceil(10 + d.distanceKm * 4)
+      : d.rideType == 'motorcycle' ? math.ceil(5 + d.distanceKm * 2) : math.ceil(6 + d.distanceKm * 2.5); }
+    function validUser(d) {
+      return d.keys().hasAll(['name','phone','email','createdAt'])
+        && d.keys().hasOnly(['name','phone','email','createdAt','avatarUrl','dateOfBirth'])
+        && d.name is string && d.name.size() <= 100 && d.phone is string && d.phone.size() <= 20
+        && d.email is string && d.email.size() <= 254 && d.createdAt is timestamp
+        && (!('avatarUrl' in d) || d.avatarUrl == null || (d.avatarUrl is string && d.avatarUrl.size() <= 2000))
+        && (!('dateOfBirth' in d) || d.dateOfBirth == null || (d.dateOfBirth is int && d.dateOfBirth >= -2208988800000 && d.dateOfBirth <= request.time.toMillis()));
+    }
+    function validDriver(d) {
+      return d.keys().hasAll(['name','phone','plateNumber','vehicleType','approved','isAvailable','activeRideId','rating'])
+        && d.keys().hasOnly(['name','phone','plateNumber','vehicleType','approved','isAvailable','activeRideId','rating'])
+        && text(d.name,100) && d.phone is string && d.phone.matches('^01[0125][0-9]{8}$') && text(d.plateNumber,30)
+        && d.vehicleType in ['car','motorcycle','scooter'] && d.approved is bool && d.isAvailable is bool
+        && (d.activeRideId == null || text(d.activeRideId,100)) && d.rating is number && d.rating >= 0 && d.rating <= 5;
+    }
+    function validRide(d) {
+      return d.keys().hasAll(['userId','userName','from','to','pickupLat','pickupLng','dropoffLat','dropoffLng','rideType','price','distanceKm','paymentMethod','status','createdAt'])
+        && d.keys().hasOnly(['userId','userName','from','to','pickupLat','pickupLng','dropoffLat','dropoffLng','rideType','price','distanceKm','paymentMethod','status','createdAt',
+          'driverId','driver','acceptedAt','startedAt','arrivedAt','completedAt','updatedAt','durationMinutes','driverLat','driverLng','locationAt'])
+        && text(d.userId,128) && d.userName is string && d.userName.size() <= 100 && text(d.from,200) && text(d.to,200)
+        && point(d.pickupLat,d.pickupLng) && point(d.dropoffLat,d.dropoffLng)
+        && d.rideType in ['car','motorcycle','scooter'] && d.paymentMethod == 'cash'
+        && d.distanceKm is number && d.distanceKm >= 1 && d.distanceKm <= 200 && math.abs(d.distanceKm - km(d)) < 0.00001
+        && d.price is int && d.price == fare(d) && d.createdAt is timestamp
+        && d.status in ['searching','accepted','in_progress','arrived','completed','cancelled'];
+    }
+    function participant(d) { return signed() && (d.userId == request.auth.uid || d.get('driverId','') == request.auth.uid); }
+    function receiptMatches(t, r, id) {
+      return t.keys().hasAll(['userId','driverId','requestId','from','to','rideType','price','driverName','driverRating','driverPlate','date','durationMinutes','distanceKm','paymentMethod','createdAt'])
+        && t.keys().hasOnly(['userId','driverId','requestId','from','to','rideType','price','driverName','driverRating','driverPlate','date','durationMinutes','distanceKm','paymentMethod','createdAt'])
+        && t.userId == r.userId && t.driverId == r.driverId && t.requestId == id
+        && t.from == r.from && t.to == r.to && t.rideType == r.rideType && t.price == r.price
+        && t.driverName == r.driver.name && t.driverRating == r.driver.rating && t.driverPlate == r.driver.plateNumber
+        && t.distanceKm == r.distanceKm && t.paymentMethod == 'cash' && t.durationMinutes == r.durationMinutes
+        && t.durationMinutes is int && t.durationMinutes >= 0 && t.durationMinutes <= 1440
+        && t.date is int && math.abs(t.date - request.time.toMillis()) < 300000 && t.createdAt == request.time;
+    }
+    match /users/{uid} {
+      allow get: if owner(uid);
+      allow create: if owner(uid) && validUser(request.resource.data) && request.resource.data.createdAt == request.time;
+      allow update: if owner(uid) && validUser(request.resource.data)
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['name','phone','email','avatarUrl','dateOfBirth']);
+      allow delete: if owner(uid) && !exists(/databases/$(database)/documents/active_rides/$(uid));
+      match /notification_states/{id} {
+        function validMarker(d) { return d.keys().hasAll(['isRead','hidden']) && d.keys().hasOnly(['isRead','hidden']) && d.isRead is bool && d.hidden is bool; }
+        allow read, delete: if owner(uid);
+        allow create, update: if owner(uid) && validMarker(request.resource.data);
+      }
+    }
+    match /active_rides/{uid} {
+      function validPointer(d) { return d.keys().hasOnly(['requestId']) && text(d.requestId,100)
+        && getAfter(/databases/$(database)/documents/ride_requests/$(d.requestId)).data.userId == uid
+        && getAfter(/databases/$(database)/documents/ride_requests/$(d.requestId)).data.status in ['searching','accepted','in_progress','arrived']; }
+      allow get: if owner(uid);
+      allow create: if owner(uid) && validPointer(request.resource.data);
+      allow update: if owner(uid) && validPointer(request.resource.data) && request.resource.data.requestId == resource.data.requestId;
+      allow delete: if owner(uid) && getAfter(/databases/$(database)/documents/ride_requests/$(resource.data.requestId)).data.status in ['cancelled','completed'];
+    }
+    match /drivers/{uid} {
+      allow get: if owner(uid);
+      allow create: if owner(uid) && validDriver(request.resource.data) && request.resource.data.approved == false
+        && request.resource.data.isAvailable == false && request.resource.data.activeRideId == null && request.resource.data.rating == 0;
+      allow update: if validDriver(request.resource.data) && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['isAvailable','activeRideId']) && (
+        (owner(uid) && resource.data.approved == true && (
+          (resource.data.activeRideId == null && request.resource.data.activeRideId == null)
+          || (resource.data.activeRideId == null && request.resource.data.isAvailable == false
+            && getAfter(/databases/$(database)/documents/ride_requests/$(request.resource.data.activeRideId)).data.driverId == uid
+            && getAfter(/databases/$(database)/documents/ride_requests/$(request.resource.data.activeRideId)).data.status == 'accepted')
+          || (resource.data.activeRideId != null && request.resource.data.activeRideId == null && request.resource.data.isAvailable == true
+            && getAfter(/databases/$(database)/documents/ride_requests/$(resource.data.activeRideId)).data.status == 'arrived')))
+        || (signed() && resource.data.activeRideId != null && request.resource.data.activeRideId == null && request.resource.data.isAvailable == true
+          && getAfter(/databases/$(database)/documents/ride_requests/$(resource.data.activeRideId)).data.userId == request.auth.uid
+          && getAfter(/databases/$(database)/documents/ride_requests/$(resource.data.activeRideId)).data.status == 'cancelled'));
+      allow delete: if owner(uid) && resource.data.activeRideId == null;
+    }
+    match /ride_requests/{id} {
+      allow read: if participant(resource.data) || (approved() && driver(request.auth.uid).isAvailable == true
+        && resource.data.status == 'searching' && resource.data.rideType == driver(request.auth.uid).vehicleType);
+      allow create: if signed() && validRide(request.resource.data) && request.resource.data.userId == request.auth.uid
+        && request.resource.data.status == 'searching' && request.resource.data.createdAt == request.time
+        && request.resource.data.keys().hasOnly(['userId','userName','from','to','pickupLat','pickupLng','dropoffLat','dropoffLng','rideType','price','distanceKm','paymentMethod','status','createdAt'])
+        && !exists(/databases/$(database)/documents/active_rides/$(request.auth.uid))
+        && getAfter(/databases/$(database)/documents/active_rides/$(request.auth.uid)).data.requestId == id;
+      function accepts(d) {
+        let profile = driver(request.auth.uid);
+        return approved() && profile.isAvailable == true && profile.activeRideId == null
+          && resource.data.userId != request.auth.uid && resource.data.status == 'searching' && d.status == 'accepted'
+          && d.rideType == profile.vehicleType && d.driverId == request.auth.uid && d.acceptedAt == request.time
+          && d.driver == {'id': request.auth.uid, 'name': profile.name, 'phone': profile.phone, 'plateNumber': profile.plateNumber, 'rating': profile.rating, 'avatarUrl': null}
+          && d.diff(resource.data).affectedKeys().hasOnly(['status','driverId','driver','acceptedAt'])
+          && getAfter(/databases/$(database)/documents/drivers/$(request.auth.uid)).data.activeRideId == id
+          && getAfter(/databases/$(database)/documents/drivers/$(request.auth.uid)).data.isAvailable == false;
+      }
+      function drives(d) {
+        return approved() && resource.data.get('driverId','') == request.auth.uid && (
+          (resource.data.status == 'accepted' && d.status == 'in_progress' && d.startedAt == request.time
+            && d.diff(resource.data).affectedKeys().hasOnly(['status','startedAt']))
+          || (resource.data.status == 'in_progress' && d.status == 'arrived' && d.arrivedAt == request.time
+            && d.durationMinutes is int && d.durationMinutes >= 0 && d.durationMinutes <= 1440
+            && d.diff(resource.data).affectedKeys().hasOnly(['status','arrivedAt','durationMinutes'])
+            && receiptMatches(getAfter(/databases/$(database)/documents/trips/$(id)).data, d, id)
+            && getAfter(/databases/$(database)/documents/drivers/$(request.auth.uid)).data.activeRideId == null)
+          || (resource.data.status in ['accepted','in_progress'] && d.status == resource.data.status
+            && d.diff(resource.data).affectedKeys().hasOnly(['driverLat','driverLng','locationAt'])
+            && point(d.driverLat,d.driverLng) && d.locationAt == request.time));
+      }
+      function riderChanges(d) {
+        return owner(resource.data.userId) && (
+          (resource.data.status in ['searching','accepted'] && d.status == 'cancelled' && d.updatedAt == request.time
+            && d.diff(resource.data).affectedKeys().hasOnly(['status','updatedAt'])
+            && !existsAfter(/databases/$(database)/documents/active_rides/$(request.auth.uid))
+            && (!('driverId' in resource.data) || getAfter(/databases/$(database)/documents/drivers/$(resource.data.driverId)).data.activeRideId == null))
+          || (resource.data.status == 'arrived' && d.status == 'completed' && d.completedAt == request.time
+            && d.diff(resource.data).affectedKeys().hasOnly(['status','completedAt'])
+            && exists(/databases/$(database)/documents/trips/$(id))
+            && !existsAfter(/databases/$(database)/documents/active_rides/$(request.auth.uid))));
+      }
+      allow update: if signed() && validRide(request.resource.data) && (riderChanges(request.resource.data) || accepts(request.resource.data) || drives(request.resource.data));
+      match /messages/{messageId} {
+        function parent() { return get(/databases/$(database)/documents/ride_requests/$(id)).data; }
+        function validMessage(d) { return d.keys().hasAll(['senderId','text','sentAt']) && d.keys().hasOnly(['senderId','text','sentAt'])
+          && d.senderId == request.auth.uid && text(d.text,1000) && d.sentAt == request.time; }
+        allow read: if participant(parent());
+        allow create: if participant(parent()) && parent().status in ['accepted','in_progress','arrived'] && validMessage(request.resource.data);
+      }
+    }
+    match /trips/{id} {
+      allow read: if participant(resource.data);
+      allow create: if approved() && request.resource.data.driverId == request.auth.uid
+        && get(/databases/$(database)/documents/ride_requests/$(id)).data.status == 'in_progress'
+        && getAfter(/databases/$(database)/documents/ride_requests/$(id)).data.status == 'arrived'
+        && receiptMatches(request.resource.data, getAfter(/databases/$(database)/documents/ride_requests/$(id)).data, id);
+    }
+    match /ratings/{id} {
+      function validRating(d) { return d.keys().hasAll(['userId','tripId','stars','tags','comment','updatedAt'])
+        && d.keys().hasOnly(['userId','tripId','stars','tags','comment','updatedAt'])
+        && d.userId == request.auth.uid && d.tripId == id && d.stars is int && d.stars >= 1 && d.stars <= 5
+        && d.tags is list && d.tags.size() <= 6 && d.tags.toSet().hasOnly(['نظافة','أمان','سرعة','دقة الوقت','الأدب','الطريق الصح'])
+        && d.comment is string && d.comment.size() <= 1000 && d.updatedAt == request.time
+        && get(/databases/$(database)/documents/trips/$(id)).data.userId == request.auth.uid; }
+      allow get: if owner(resource.data.userId);
+      allow create: if signed() && validRating(request.resource.data);
+      allow update: if owner(resource.data.userId) && validRating(request.resource.data);
+    }
+    match /{document=**} { allow read, write: if false; }
+  }
+}

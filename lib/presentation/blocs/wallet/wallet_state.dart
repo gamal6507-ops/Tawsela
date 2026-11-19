@@ -9,7 +9,9 @@ abstract class WalletState extends Equatable {
 }
 
 class WalletInitial extends WalletState {}
+
 class WalletLoading extends WalletState {}
+
 class WalletLoaded extends WalletState {
   final Wallet wallet;
   final List<Transaction> transactions;
@@ -17,6 +19,7 @@ class WalletLoaded extends WalletState {
   @override
   List<Object?> get props => [wallet, transactions];
 }
+
 class WalletToppingUp extends WalletState {
   final Wallet wallet;
   final List<Transaction> transactions;
@@ -24,6 +27,7 @@ class WalletToppingUp extends WalletState {
   @override
   List<Object?> get props => [wallet, transactions];
 }
+
 class WalletToppedUp extends WalletState {
   final Wallet wallet;
   final List<Transaction> transactions;
@@ -31,6 +35,7 @@ class WalletToppedUp extends WalletState {
   @override
   List<Object?> get props => [wallet, transactions];
 }
+
 class WalletError extends WalletState {
   final String message;
   const WalletError(this.message);

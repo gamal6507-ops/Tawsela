@@ -11,19 +11,18 @@ class AuthCubit extends Cubit<AuthState> {
 
   AuthCubit(this._authRepository) : super(AuthInitial());
 
+  firebase_auth.User? get currentUser => _authRepository.currentUser;
+
   /// Listen to auth state changes from Firebase
   void checkAuth() {
     _authSubscription?.cancel();
-    _authSubscription = _authRepository.authStateChanges.listen(
-      (user) {
-        if (user != null) {
-          emit(Authenticated(user));
-        } else {
-          emit(Unauthenticated());
-        }
-      },
-      onError: (_) => emit(Unauthenticated()),
-    );
+    _authSubscription = _authRepository.authStateChanges.listen((user) {
+      if (user != null) {
+        emit(Authenticated(user));
+      } else {
+        emit(Unauthenticated());
+      }
+    }, onError: (_) => emit(Unauthenticated()));
   }
 
   /// Sign in with email and password
@@ -33,10 +32,7 @@ class AuthCubit extends Cubit<AuthState> {
   }) async {
     emit(AuthLoading());
     try {
-      await _authRepository.signInWithEmail(
-        email: email,
-        password: password,
-      );
+      await _authRepository.signInWithEmail(email: email, password: password);
       // Auth state change listener will emit Authenticated
     } on firebase_auth.FirebaseAuthException catch (e) {
       emit(AuthError(_mapFirebaseError(e.code, e.message)));

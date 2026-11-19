@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:flutter/foundation.dart';
 import 'package:toktok/domain/repositories/auth_repository.dart';
 
 class FirebaseAuthRepository implements AuthRepository {
@@ -19,9 +20,9 @@ class FirebaseAuthRepository implements AuthRepository {
 
   Future<void> _ensureGoogleSignInInitialized() async {
     if (!_isGoogleSignInInitialized) {
+      const clientId = String.fromEnvironment('GOOGLE_SERVER_CLIENT_ID');
       await _googleSignIn.initialize(
-        serverClientId:
-            '788170634537-mnsaclmiseuab4p764ldcunbfsiuj76a.apps.googleusercontent.com',
+        serverClientId: clientId.isEmpty ? null : clientId,
       );
       _isGoogleSignInInitialized = true;
     }
@@ -33,15 +34,18 @@ class FirebaseAuthRepository implements AuthRepository {
     String? phone,
   }) async {
     try {
-      await _firestore.collection('users').doc(user.uid).set({
-        'name': name ?? user.displayName ?? '',
-        'email': user.email ?? '',
-        'phone': phone ?? user.phoneNumber ?? '',
-        'createdAt': FieldValue.serverTimestamp(),
-        'rating': 0.0,
-        'totalTrips': 0,
-        'totalKm': 0.0,
-      }, SetOptions(merge: true)).timeout(const Duration(seconds: 2));
+      await _firestore.runTransaction((tx) async {
+        final ref = _firestore.collection('users').doc(user.uid);
+        final profile = await tx.get(ref);
+        if (!profile.exists) {
+          tx.set(ref, {
+            'name': name ?? user.displayName ?? '',
+            'email': user.email ?? '',
+            'phone': phone ?? user.phoneNumber ?? '',
+            'createdAt': FieldValue.serverTimestamp(),
+          });
+        }
+      });
     } catch (_) {
       // Do not fail authentication if Firestore profile write is unavailable.
     }
@@ -100,6 +104,15 @@ class FirebaseAuthRepository implements AuthRepository {
 
   @override
   Future<firebase_auth.UserCredential> signInWithGoogle() async {
+    if (kIsWeb) {
+      final result = await _firebaseAuth.signInWithPopup(
+        firebase_auth.GoogleAuthProvider(),
+      );
+      if (result.user != null) {
+        await _saveUserProfileIfNeeded(user: result.user!);
+      }
+      return result;
+    }
     await _ensureGoogleSignInInitialized();
     final googleUser = await _googleSignIn.authenticate();
     final googleAuth = googleUser.authentication;
@@ -107,7 +120,8 @@ class FirebaseAuthRepository implements AuthRepository {
     if (googleAuth.idToken == null) {
       throw firebase_auth.FirebaseAuthException(
         code: 'missing-google-id-token',
-        message: 'لم يتم استلام رمز التحقق من Google (تأكد من SHA-1 و google-services.json)',
+        message:
+            'لم يتم استلام رمز التحقق من Google (تأكد من SHA-1 و google-services.json)',
       );
     }
 
@@ -182,11 +196,32 @@ class FirebaseAuthRepository implements AuthRepository {
       );
     }
 
-    try {
-      await _firestore.collection('users').doc(user.uid).delete();
-    } catch (_) {
-      // Proceed with account deletion even if Firestore doc does not exist.
+    final active = await _firestore
+        .collection('active_rides')
+        .doc(user.uid)
+        .get(const GetOptions(source: Source.server));
+    final driverRef = _firestore.collection('drivers').doc(user.uid);
+    final driver = await driverRef.get(const GetOptions(source: Source.server));
+    if (active.exists || driver.data()?['activeRideId'] != null) {
+      throw StateError('أكمل أو الغِ الرحلة النشطة أولاً');
     }
+    final markers =
+        await _firestore
+            .collection('users')
+            .doc(user.uid)
+            .collection('notification_states')
+            .get();
+    for (var start = 0; start < markers.docs.length; start += 400) {
+      final batch = _firestore.batch();
+      for (final marker in markers.docs.skip(start).take(400)) {
+        batch.delete(marker.reference);
+      }
+      await batch.commit();
+    }
+    final batch = _firestore.batch();
+    batch.delete(_firestore.collection('users').doc(user.uid));
+    if (driver.exists) batch.delete(driverRef);
+    await batch.commit();
     await user.delete();
   }
 
@@ -194,6 +229,7 @@ class FirebaseAuthRepository implements AuthRepository {
   Future<void> signOut() async {
     await _firebaseAuth.signOut();
     try {
+      if (kIsWeb) return;
       await _ensureGoogleSignInInitialized();
       await _googleSignIn.signOut();
     } catch (_) {}

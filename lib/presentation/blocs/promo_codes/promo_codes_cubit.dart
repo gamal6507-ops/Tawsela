@@ -15,7 +15,13 @@ class PromoCodesCubit extends Cubit<PromoCodesState> {
       final expired = await _repository.getExpiredPromoCodes();
       emit(PromoCodesLoaded(available: available, expired: expired));
     } catch (e) {
-      emit(PromoCodeFailed(message: e.toString(), available: const [], expired: const []));
+      emit(
+        PromoCodeFailed(
+          message: e.toString(),
+          available: const [],
+          expired: const [],
+        ),
+      );
     }
   }
 
@@ -39,11 +45,13 @@ class PromoCodesCubit extends Cubit<PromoCodesState> {
 
     final trimmedCode = code.trim();
     if (trimmedCode.isEmpty) {
-      emit(PromoCodeFailed(
-        message: 'من فضلك ادخل كود الخصم',
-        available: available,
-        expired: expired,
-      ));
+      emit(
+        PromoCodeFailed(
+          message: 'من فضلك ادخل كود الخصم',
+          available: available,
+          expired: expired,
+        ),
+      );
       return;
     }
 
@@ -51,24 +59,30 @@ class PromoCodesCubit extends Cubit<PromoCodesState> {
     try {
       final success = await _repository.applyPromoCode(trimmedCode);
       if (success) {
-        emit(PromoCodeApplied(
-          'تم تطبيق الكود بنجاح!',
-          available: available,
-          expired: expired,
-        ));
+        emit(
+          PromoCodeApplied(
+            'تم تطبيق الكود بنجاح!',
+            available: available,
+            expired: expired,
+          ),
+        );
       } else {
-        emit(PromoCodeFailed(
-          message: 'الكود غير صالح أو منتهي الصلاحية',
-          available: available,
-          expired: expired,
-        ));
+        emit(
+          PromoCodeFailed(
+            message: 'الكود غير صالح أو منتهي الصلاحية',
+            available: available,
+            expired: expired,
+          ),
+        );
       }
     } catch (e) {
-      emit(PromoCodeFailed(
-        message: e.toString(),
-        available: available,
-        expired: expired,
-      ));
+      emit(
+        PromoCodeFailed(
+          message: e.toString(),
+          available: available,
+          expired: expired,
+        ),
+      );
     }
   }
 }

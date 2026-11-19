@@ -53,8 +53,8 @@ class PromoCode extends Equatable {
       gradientColors:
           map['gradientColors'] != null
               ? List<List<int>>.from(
-                (map['gradientColors'] as List<int>).map<List<int>?>(
-                  (x) => x as List<int>,
+                (map['gradientColors'] as List).map<List<int>>(
+                  (x) => (x as List).map((v) => (v as num).toInt()).toList(),
                 ),
               )
               : null,

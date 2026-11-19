@@ -73,14 +73,12 @@ void main() {
         );
         return AuthCubit(mockAuthRepository);
       },
-      act: (cubit) => cubit.signInWithEmail(
-        email: 'test@example.com',
-        password: 'wrong',
-      ),
-      expect: () => [
-        AuthLoading(),
-        const AuthError('كلمة السر غلط'),
-      ],
+      act:
+          (cubit) => cubit.signInWithEmail(
+            email: 'test@example.com',
+            password: 'wrong',
+          ),
+      expect: () => [AuthLoading(), const AuthError('كلمة السر غلط')],
     );
 
     blocTest<AuthCubit, AuthState>(
@@ -96,23 +94,26 @@ void main() {
         ).thenThrow(
           firebase_auth.FirebaseAuthException(
             code: 'internal-error',
-            message: 'An internal error has occurred. [ CONFIGURATION_NOT_FOUND ]',
+            message:
+                'An internal error has occurred. [ CONFIGURATION_NOT_FOUND ]',
           ),
         );
         return AuthCubit(mockAuthRepository);
       },
-      act: (cubit) => cubit.signUpWithEmail(
-        name: 'Seif',
-        email: 'seif@gmail.com',
-        phone: '01012345678',
-        password: 'password123',
-      ),
-      expect: () => [
-        AuthLoading(),
-        const AuthError(
-          'خدمة تسجيل الدخول غير مفعلة في إعدادات Firebase (CONFIGURATION_NOT_FOUND)',
-        ),
-      ],
+      act:
+          (cubit) => cubit.signUpWithEmail(
+            name: 'Seif',
+            email: 'seif@gmail.com',
+            phone: '01012345678',
+            password: 'password123',
+          ),
+      expect:
+          () => [
+            AuthLoading(),
+            const AuthError(
+              'خدمة تسجيل الدخول غير مفعلة في إعدادات Firebase (CONFIGURATION_NOT_FOUND)',
+            ),
+          ],
     );
 
     blocTest<AuthCubit, AuthState>(
@@ -150,10 +151,11 @@ void main() {
         ).thenAnswer((_) async {});
         return AuthCubit(mockAuthRepository);
       },
-      act: (cubit) => cubit.changePassword(
-        currentPassword: 'oldPassword',
-        newPassword: 'newPassword123',
-      ),
+      act:
+          (cubit) => cubit.changePassword(
+            currentPassword: 'oldPassword',
+            newPassword: 'newPassword123',
+          ),
       expect: () => [AuthLoading(), AuthPasswordChanged()],
     );
 

@@ -39,7 +39,7 @@ class Driver extends Equatable {
       name: map['name'] as String,
       phone: map['phone'] as String,
       plateNumber: map['plateNumber'] as String,
-      rating: map['rating'] as double,
+      rating: (map['rating'] as num?)?.toDouble() ?? 0,
       avatarUrl: map['avatarUrl'] != null ? map['avatarUrl'] as String : null,
     );
   }

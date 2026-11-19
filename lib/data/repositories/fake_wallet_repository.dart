@@ -55,14 +55,17 @@ class FakeWalletRepository implements WalletRepository {
   Future<Wallet> topUp(double amount) async {
     await Future.delayed(const Duration(milliseconds: 800));
     _balance += amount;
-    _transactions.insert(0, Transaction(
-      id: 't${_transactions.length + 1}',
-      title: 'شحن رصيد',
-      amount: amount,
-      type: TransactionType.topup,
-      date: DateTime.now(),
-      subtitle: 'شحن يدوي',
-    ));
+    _transactions.insert(
+      0,
+      Transaction(
+        id: 't${_transactions.length + 1}',
+        title: 'شحن رصيد',
+        amount: amount,
+        type: TransactionType.topup,
+        date: DateTime.now(),
+        subtitle: 'شحن يدوي',
+      ),
+    );
     return Wallet(balance: _balance);
   }
 

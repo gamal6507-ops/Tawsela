@@ -6,19 +6,20 @@ class PromoCodeCard extends StatelessWidget {
   final PromoCode promoCode;
   final VoidCallback? onApply;
 
-  const PromoCodeCard({
-    super.key,
-    required this.promoCode,
-    this.onApply,
-  });
+  const PromoCodeCard({super.key, required this.promoCode, this.onApply});
 
   @override
   Widget build(BuildContext context) {
-    final colors = promoCode.gradientColors != null && promoCode.gradientColors!.isNotEmpty
-        ? promoCode.gradientColors![0]
-        : [0xFFF5B840, 0xFFF5A623];
-    final gradientColors = Color(colors[0]).withValues(alpha: promoCode.isActive ? 1 : 0.3);
-    final gradientColors2 = Color(colors.length > 1 ? colors[1] : colors[0]).withValues(alpha: promoCode.isActive ? 1 : 0.3);
+    final colors =
+        promoCode.gradientColors != null && promoCode.gradientColors!.isNotEmpty
+            ? promoCode.gradientColors![0]
+            : [0xFFF5B840, 0xFFF5A623];
+    final gradientColors = Color(
+      colors[0],
+    ).withValues(alpha: promoCode.isActive ? 1 : 0.3);
+    final gradientColors2 = Color(
+      colors.length > 1 ? colors[1] : colors[0],
+    ).withValues(alpha: promoCode.isActive ? 1 : 0.3);
 
     return Container(
       padding: const EdgeInsets.all(20),
@@ -80,7 +81,10 @@ class PromoCodeCard extends StatelessWidget {
               child: GestureDetector(
                 onTap: onApply,
                 child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 20,
+                    vertical: 8,
+                  ),
                   decoration: BoxDecoration(
                     color: Colors.black,
                     borderRadius: BorderRadius.circular(20),

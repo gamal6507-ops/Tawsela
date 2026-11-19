@@ -46,7 +46,10 @@ class TripHistoryCard extends StatelessWidget {
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      DateFormat('yyyy/MM/dd - hh:mm a', 'ar').format(trip.date),
+                      DateFormat(
+                        'yyyy/MM/dd - hh:mm a',
+                        'ar',
+                      ).format(trip.date),
                       style: GoogleFonts.cairo(
                         fontSize: 12,
                         color: AppColors.textSecondary,
@@ -72,22 +75,40 @@ class TripHistoryCard extends StatelessWidget {
               const SizedBox(width: 4),
               Text(
                 '${trip.durationMinutes} دقيقة',
-                style: GoogleFonts.cairo(fontSize: 12, color: AppColors.textSecondary),
+                style: GoogleFonts.cairo(
+                  fontSize: 12,
+                  color: AppColors.textSecondary,
+                ),
               ),
               const SizedBox(width: 16),
-              Icon(Icons.directions_car_outlined, size: 16, color: AppColors.textSecondary),
+              Icon(
+                Icons.directions_car_outlined,
+                size: 16,
+                color: AppColors.textSecondary,
+              ),
               const SizedBox(width: 4),
               Text(
                 '${trip.distanceKm.toStringAsFixed(1)} كم',
-                style: GoogleFonts.cairo(fontSize: 12, color: AppColors.textSecondary),
+                style: GoogleFonts.cairo(
+                  fontSize: 12,
+                  color: AppColors.textSecondary,
+                ),
               ),
               const Spacer(),
               if (trip.userRating != null)
-                ...List.generate(5, (i) => Icon(
-                      i < trip.userRating! ? Icons.star_rounded : Icons.star_border_rounded,
-                      size: 16,
-                      color: i < trip.userRating! ? AppColors.accent : AppColors.textTertiary,
-                    )),
+                ...List.generate(
+                  5,
+                  (i) => Icon(
+                    i < trip.userRating!
+                        ? Icons.star_rounded
+                        : Icons.star_border_rounded,
+                    size: 16,
+                    color:
+                        i < trip.userRating!
+                            ? AppColors.accent
+                            : AppColors.textTertiary,
+                  ),
+                ),
             ],
           ),
           const SizedBox(height: 12),
@@ -104,7 +125,13 @@ class TripHistoryCard extends StatelessWidget {
                       borderRadius: BorderRadius.circular(12),
                     ),
                   ),
-                  child: Text('احجز تاني', style: GoogleFonts.cairo(fontSize: 13, fontWeight: FontWeight.bold)),
+                  child: Text(
+                    'احجز تاني',
+                    style: GoogleFonts.cairo(
+                      fontSize: 13,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
                 ),
               ),
               const SizedBox(width: 10),

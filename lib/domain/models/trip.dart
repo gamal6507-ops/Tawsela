@@ -4,7 +4,7 @@ import 'package:equatable/equatable.dart';
 
 import 'ride.dart';
 
-enum PaymentMethod { wallet, card }
+enum PaymentMethod { cash, wallet, card }
 
 class Trip extends Equatable {
   final String id;
@@ -98,11 +98,11 @@ class Trip extends Equatable {
       rideType: RideType.values.byName(map['rideType']),
       price: map['price'] as int,
       driverName: map['driverName'] as String,
-      driverRating: map['driverRating'] as double,
+      driverRating: (map['driverRating'] as num).toDouble(),
       driverPlate: map['driverPlate'] as String,
       date: DateTime.fromMillisecondsSinceEpoch(map['date'] as int),
       durationMinutes: map['durationMinutes'] as int,
-      distanceKm: map['distanceKm'] as double,
+      distanceKm: (map['distanceKm'] as num).toDouble(),
       paymentMethod: PaymentMethod.values.byName(map['paymentMethod']),
       userRating: map['userRating'] != null ? map['userRating'] as int : null,
     );

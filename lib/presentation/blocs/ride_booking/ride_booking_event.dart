@@ -2,6 +2,7 @@ import 'package:equatable/equatable.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:toktok/domain/models/ride.dart';
 import 'package:toktok/domain/models/trip.dart';
+import 'package:toktok/domain/models/ride_request.dart';
 
 abstract class RideBookingEvent extends Equatable {
   const RideBookingEvent();
@@ -25,7 +26,13 @@ class RideBookingStarted extends RideBookingEvent {
   });
 
   @override
-  List<Object?> get props => [from, to, pickupLatLng, dropoffLatLng, distanceKm];
+  List<Object?> get props => [
+    from,
+    to,
+    pickupLatLng,
+    dropoffLatLng,
+    distanceKm,
+  ];
 }
 
 class RideTypeSelected extends RideBookingEvent {
@@ -68,4 +75,20 @@ class RideArrived extends RideBookingEvent {
 
 class BookingCancelled extends RideBookingEvent {
   const BookingCancelled();
+}
+
+class RestoreBooking extends RideBookingEvent {
+  const RestoreBooking();
+}
+
+class RemoteRideChanged extends RideBookingEvent {
+  final RideRequest request;
+  const RemoteRideChanged(this.request);
+  @override
+  List<Object?> get props => [request];
+}
+
+class BookingFailure extends RideBookingEvent {
+  final String message;
+  const BookingFailure(this.message);
 }

@@ -104,7 +104,10 @@ class AppTheme {
           borderSide: const BorderSide(color: AppColors.accent, width: 2),
         ),
         hintStyle: GoogleFonts.cairo(color: AppColors.textTertiary),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 20,
+          vertical: 16,
+        ),
       ),
       bottomNavigationBarTheme: const BottomNavigationBarThemeData(
         backgroundColor: AppColors.cardBackground,

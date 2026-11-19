@@ -35,7 +35,10 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
         actions: [
           TextButton(
             onPressed: () => context.read<NotificationsCubit>().clearAll(),
-            child: Text('مسح الكل', style: GoogleFonts.cairo(color: AppColors.error, fontSize: 14)),
+            child: Text(
+              'مسح الكل',
+              style: GoogleFonts.cairo(color: AppColors.error, fontSize: 14),
+            ),
           ),
         ],
       ),
@@ -44,8 +47,11 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
           constraints: const BoxConstraints(maxWidth: 480),
           child: BlocBuilder<NotificationsCubit, NotificationsState>(
             builder: (context, state) {
-              if (state is NotificationsLoading || state is NotificationsInitial) {
-                return const Center(child: CircularProgressIndicator(color: AppColors.accent));
+              if (state is NotificationsLoading ||
+                  state is NotificationsInitial) {
+                return const Center(
+                  child: CircularProgressIndicator(color: AppColors.accent),
+                );
               }
               if (state is NotificationsEmpty) {
                 return const EmptyState(
@@ -58,11 +64,24 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                 return ListView.separated(
                   padding: const EdgeInsets.all(20),
                   itemCount: state.notifications.length,
-                  separatorBuilder: (_, __) => const Divider(color: AppColors.border),
+                  separatorBuilder:
+                      (_, __) => const Divider(color: AppColors.border),
                   itemBuilder: (context, index) {
                     final notification = state.notifications[index];
                     return _buildNotificationTile(notification);
                   },
+                );
+              }
+              if (state is NotificationsError) {
+                return Center(
+                  child: TextButton(
+                    onPressed:
+                        () =>
+                            context
+                                .read<NotificationsCubit>()
+                                .loadNotifications(),
+                    child: const Text('تعذر تحميل الإشعارات • حاول تاني'),
+                  ),
                 );
               }
               return const SizedBox.shrink();
@@ -97,12 +116,16 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
     }
 
     return GestureDetector(
-      onTap: () => context.read<NotificationsCubit>().markAsRead(notification.id),
+      onTap:
+          () => context.read<NotificationsCubit>().markAsRead(notification.id),
       child: Container(
         margin: const EdgeInsets.only(bottom: 4),
         padding: const EdgeInsets.all(14),
         decoration: BoxDecoration(
-          color: notification.isRead ? null : AppColors.accent.withValues(alpha: 0.05),
+          color:
+              notification.isRead
+                  ? null
+                  : AppColors.accent.withValues(alpha: 0.05),
           borderRadius: BorderRadius.circular(12),
         ),
         child: Row(
@@ -125,21 +148,30 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                     notification.title,
                     style: GoogleFonts.cairo(
                       fontSize: 15,
-                      fontWeight: notification.isRead ? FontWeight.normal : FontWeight.bold,
+                      fontWeight:
+                          notification.isRead
+                              ? FontWeight.normal
+                              : FontWeight.bold,
                       color: AppColors.textPrimary,
                     ),
                   ),
                   const SizedBox(height: 4),
                   Text(
                     notification.body,
-                    style: GoogleFonts.cairo(fontSize: 13, color: AppColors.textSecondary),
+                    style: GoogleFonts.cairo(
+                      fontSize: 13,
+                      color: AppColors.textSecondary,
+                    ),
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                   ),
                   const SizedBox(height: 4),
                   Text(
                     _timeAgo(notification.date),
-                    style: GoogleFonts.cairo(fontSize: 11, color: AppColors.textTertiary),
+                    style: GoogleFonts.cairo(
+                      fontSize: 11,
+                      color: AppColors.textTertiary,
+                    ),
                   ),
                 ],
               ),
@@ -148,7 +180,10 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
               Container(
                 width: 8,
                 height: 8,
-                decoration: const BoxDecoration(color: AppColors.accent, shape: BoxShape.circle),
+                decoration: const BoxDecoration(
+                  color: AppColors.accent,
+                  shape: BoxShape.circle,
+                ),
               ),
           ],
         ),

@@ -32,6 +32,17 @@ migrate_working_dir/
 .pub-cache/
 .pub/
 /build/
+node_modules/
+.cache/
+.vercel/
+.firebase/
+*-debug.log
+firebase-web-config.json
+analysis-result.txt
+android/key.properties
+*.jks
+*.keystore
+!android/app/debug.keystore
 
 # Symbolication related
 app.*.symbols

@@ -9,14 +9,29 @@ void main() {
     final service = LocationService();
 
     test('accepts coordinates inside Egypt', () {
-      expect(service.isInsideEgypt(const LatLng(30.0444, 31.2357)), isTrue); // Cairo
-      expect(service.isInsideEgypt(const LatLng(31.2001, 29.9187)), isTrue); // Alexandria
-      expect(service.isInsideEgypt(const LatLng(24.0889, 32.8998)), isTrue); // Aswan
+      expect(
+        service.isInsideEgypt(const LatLng(30.0444, 31.2357)),
+        isTrue,
+      ); // Cairo
+      expect(
+        service.isInsideEgypt(const LatLng(31.2001, 29.9187)),
+        isTrue,
+      ); // Alexandria
+      expect(
+        service.isInsideEgypt(const LatLng(24.0889, 32.8998)),
+        isTrue,
+      ); // Aswan
     });
 
     test('rejects coordinates outside Egypt', () {
-      expect(service.isInsideEgypt(const LatLng(37.4220, -122.0841)), isFalse); // Mountain View
-      expect(service.isInsideEgypt(const LatLng(51.5072, -0.1276)), isFalse); // London
+      expect(
+        service.isInsideEgypt(const LatLng(37.4220, -122.0841)),
+        isFalse,
+      ); // Mountain View
+      expect(
+        service.isInsideEgypt(const LatLng(51.5072, -0.1276)),
+        isFalse,
+      ); // London
     });
   });
 

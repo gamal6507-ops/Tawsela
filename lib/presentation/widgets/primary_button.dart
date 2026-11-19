@@ -29,23 +29,28 @@ class PrimaryButton extends StatelessWidget {
         style: ElevatedButton.styleFrom(
           backgroundColor: backgroundColor ?? AppColors.accent,
           foregroundColor: textColor ?? Colors.black,
-          disabledBackgroundColor: (backgroundColor ?? AppColors.accent).withValues(alpha: 0.5),
+          disabledBackgroundColor: (backgroundColor ?? AppColors.accent)
+              .withValues(alpha: 0.5),
           minimumSize: Size(double.infinity, height ?? 56),
         ),
-        child: isLoading
-            ? const SizedBox(
-                height: 24,
-                width: 24,
-                child: CircularProgressIndicator(strokeWidth: 2.5, color: Colors.black),
-              )
-            : Text(
-                text,
-                style: GoogleFonts.cairo(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: textColor ?? Colors.black,
+        child:
+            isLoading
+                ? const SizedBox(
+                  height: 24,
+                  width: 24,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2.5,
+                    color: Colors.black,
+                  ),
+                )
+                : Text(
+                  text,
+                  style: GoogleFonts.cairo(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: textColor ?? Colors.black,
+                  ),
                 ),
-              ),
       ),
     );
   }

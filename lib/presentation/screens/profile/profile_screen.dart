@@ -32,14 +32,24 @@ class _ProfileScreenState extends State<ProfileScreen> {
             child: BlocBuilder<ProfileCubit, ProfileState>(
               builder: (context, state) {
                 if (state is ProfileLoading || state is ProfileInitial) {
-                  return const Center(child: CircularProgressIndicator(color: AppColors.accent));
+                  return const Center(
+                    child: CircularProgressIndicator(color: AppColors.accent),
+                  );
                 }
                 if (state is ProfileError) {
-                  return Center(child: Text(state.message, style: GoogleFonts.cairo(color: AppColors.error)));
+                  return Center(
+                    child: Text(
+                      state.message,
+                      style: GoogleFonts.cairo(color: AppColors.error),
+                    ),
+                  );
                 }
-                final user = state is ProfileLoaded || state is ProfileSaved
-                    ? (state is ProfileLoaded ? state.user : (state as ProfileSaved).user)
-                    : null;
+                final user =
+                    state is ProfileLoaded || state is ProfileSaved
+                        ? (state is ProfileLoaded
+                            ? state.user
+                            : (state as ProfileSaved).user)
+                        : null;
 
                 if (user == null) return const SizedBox.shrink();
 
@@ -50,42 +60,74 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       const SizedBox(height: 20),
                       CircleAvatar(
                         radius: 40,
-                        backgroundColor: AppColors.accent.withValues(alpha: 0.2),
-                          child: Text(
-                            user.name.isNotEmpty ? user.name[0] : '?',
-                          style: GoogleFonts.cairo(fontSize: 36, fontWeight: FontWeight.bold, color: AppColors.accent),
+                        backgroundColor: AppColors.accent.withValues(
+                          alpha: 0.2,
+                        ),
+                        child: Text(
+                          user.name.isNotEmpty ? user.name[0] : '?',
+                          style: GoogleFonts.cairo(
+                            fontSize: 36,
+                            fontWeight: FontWeight.bold,
+                            color: AppColors.accent,
+                          ),
                         ),
                       ),
                       const SizedBox(height: 12),
                       Text(
                         user.name,
-                        style: GoogleFonts.cairo(fontSize: 22, fontWeight: FontWeight.bold, color: AppColors.textPrimary),
+                        style: GoogleFonts.cairo(
+                          fontSize: 22,
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.textPrimary,
+                        ),
                       ),
                       const SizedBox(height: 4),
                       Text(
                         user.phone,
-                        style: GoogleFonts.cairo(fontSize: 14, color: AppColors.textSecondary),
+                        style: GoogleFonts.cairo(
+                          fontSize: 14,
+                          color: AppColors.textSecondary,
+                        ),
                       ),
                       const SizedBox(height: 4),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          const Icon(Icons.star_rounded, color: AppColors.accent, size: 20),
+                          const Icon(
+                            Icons.star_rounded,
+                            color: AppColors.accent,
+                            size: 20,
+                          ),
                           const SizedBox(width: 4),
                           Text(
                             user.rating.toString(),
-                            style: GoogleFonts.cairo(fontSize: 14, color: AppColors.textSecondary),
+                            style: GoogleFonts.cairo(
+                              fontSize: 14,
+                              color: AppColors.textSecondary,
+                            ),
                           ),
                         ],
                       ),
                       const SizedBox(height: 24),
                       Row(
                         children: [
-                          StatCard(title: 'الرصيد', value: '150 ج', icon: Icons.account_balance_wallet_outlined),
+                          const StatCard(
+                            title: 'الدفع',
+                            value: 'كاش',
+                            icon: Icons.payments_outlined,
+                          ),
                           const SizedBox(width: 10),
-                          StatCard(title: 'الكيلومترات', value: '${user.totalKm}', icon: Icons.route_outlined),
+                          StatCard(
+                            title: 'الكيلومترات',
+                            value: '${user.totalKm}',
+                            icon: Icons.route_outlined,
+                          ),
                           const SizedBox(width: 10),
-                          StatCard(title: 'الرحلات', value: '${user.totalTrips}', icon: Icons.directions_car_outlined),
+                          StatCard(
+                            title: 'الرحلات',
+                            value: '${user.totalTrips}',
+                            icon: Icons.directions_car_outlined,
+                          ),
                         ],
                       ),
                       const SizedBox(height: 24),
@@ -99,7 +141,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         icon: Icons.security_outlined,
                         title: 'الأمان والخصوصية',
                         subtitle: 'إدارة الأمان',
-                        onTap: () {},
+                        onTap: () => context.push('/settings'),
                       ),
                       _buildSettingItem(
                         icon: Icons.notifications_outlined,
@@ -117,7 +159,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         icon: Icons.help_outline,
                         title: 'المساعدة والدعم',
                         subtitle: 'تواصل معنا',
-                        onTap: () {},
+                        onTap: () => context.push('/support'),
                       ),
                       const SizedBox(height: 8),
                       _buildLogoutButton(),
@@ -163,12 +205,29 @@ class _ProfileScreenState extends State<ProfileScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(title, style: GoogleFonts.cairo(fontSize: 15, fontWeight: FontWeight.bold, color: AppColors.textPrimary)),
-                  Text(subtitle, style: GoogleFonts.cairo(fontSize: 12, color: AppColors.textSecondary)),
+                  Text(
+                    title,
+                    style: GoogleFonts.cairo(
+                      fontSize: 15,
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.textPrimary,
+                    ),
+                  ),
+                  Text(
+                    subtitle,
+                    style: GoogleFonts.cairo(
+                      fontSize: 12,
+                      color: AppColors.textSecondary,
+                    ),
+                  ),
                 ],
               ),
             ),
-            const Icon(Icons.arrow_forward_ios, size: 16, color: AppColors.textTertiary),
+            const Icon(
+              Icons.arrow_forward_ios,
+              size: 16,
+              color: AppColors.textTertiary,
+            ),
           ],
         ),
       ),
@@ -180,51 +239,52 @@ class _ProfileScreenState extends State<ProfileScreen> {
       onTap: () {
         showDialog(
           context: context,
-          builder: (dialogContext) => AlertDialog(
-            backgroundColor: AppColors.cardBackground,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(20),
-              side: const BorderSide(color: AppColors.border),
-            ),
-            title: Text(
-              'تسجيل الخروج',
-              style: GoogleFonts.cairo(
-                fontWeight: FontWeight.bold,
-                color: AppColors.textPrimary,
-              ),
-              textAlign: TextAlign.center,
-            ),
-            content: Text(
-              'متأكد إنك عايز تسجل خروج؟',
-              style: GoogleFonts.cairo(color: AppColors.textSecondary),
-              textAlign: TextAlign.center,
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.of(dialogContext).pop(),
-                child: Text(
-                  'لا',
-                  style: GoogleFonts.cairo(
-                    color: AppColors.textSecondary,
-                    fontWeight: FontWeight.w600,
-                  ),
+          builder:
+              (dialogContext) => AlertDialog(
+                backgroundColor: AppColors.cardBackground,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(20),
+                  side: const BorderSide(color: AppColors.border),
                 ),
-              ),
-              TextButton(
-                onPressed: () {
-                  Navigator.of(dialogContext).pop();
-                  context.read<AuthCubit>().signOut();
-                },
-                child: Text(
-                  'أيوه',
+                title: Text(
+                  'تسجيل الخروج',
                   style: GoogleFonts.cairo(
-                    color: AppColors.error,
                     fontWeight: FontWeight.bold,
+                    color: AppColors.textPrimary,
                   ),
+                  textAlign: TextAlign.center,
                 ),
+                content: Text(
+                  'متأكد إنك عايز تسجل خروج؟',
+                  style: GoogleFonts.cairo(color: AppColors.textSecondary),
+                  textAlign: TextAlign.center,
+                ),
+                actions: [
+                  TextButton(
+                    onPressed: () => Navigator.of(dialogContext).pop(),
+                    child: Text(
+                      'لا',
+                      style: GoogleFonts.cairo(
+                        color: AppColors.textSecondary,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                  TextButton(
+                    onPressed: () {
+                      Navigator.of(dialogContext).pop();
+                      context.read<AuthCubit>().signOut();
+                    },
+                    child: Text(
+                      'أيوه',
+                      style: GoogleFonts.cairo(
+                        color: AppColors.error,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ],
               ),
-            ],
-          ),
         );
       },
       child: Container(

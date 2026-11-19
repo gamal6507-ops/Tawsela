@@ -11,13 +11,18 @@ class TripHistoryCubit extends Cubit<TripHistoryState> {
     emit(TripHistoryLoading());
     try {
       final trips = await _repository.getTripHistory();
-      final totalSpent = await _repository.getTotalSpent();
+      final totalSpent = trips.fold<double>(
+        0,
+        (total, trip) => total + trip.price,
+      );
+      if (isClosed) return;
       if (trips.isEmpty) {
         emit(TripHistoryEmpty());
       } else {
         emit(TripHistoryLoaded(trips: trips, totalSpent: totalSpent));
       }
     } catch (e) {
+      if (isClosed) return;
       emit(TripHistoryError(e.toString()));
     }
   }

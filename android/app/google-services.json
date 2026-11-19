@@ -1,87 +1,26 @@
 {
   "project_info": {
-    "project_number": "788170634537",
-    "project_id": "device-streaming-3273809b",
-    "storage_bucket": "device-streaming-3273809b.firebasestorage.app"
+    "project_number": "816331397345",
+    "project_id": "tawsela-gamal6507",
+    "storage_bucket": "tawsela-gamal6507.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:788170634537:android:30ab4c95186f12bc547338",
-        "android_client_info": {
-          "package_name": "com.example.e_commerc_app"
-        }
-      },
-      "oauth_client": [
-        {
-          "client_id": "788170634537-mnsaclmiseuab4p764ldcunbfsiuj76a.apps.googleusercontent.com",
-          "client_type": 3
-        }
-      ],
-      "api_key": [
-        {
-          "current_key": "AIzaSyBLmCiYECJNfTUmi5B-nxFMzpYqGfdEcqY"
-        }
-      ],
-      "services": {
-        "appinvite_service": {
-          "other_platform_oauth_client": [
-            {
-              "client_id": "788170634537-mnsaclmiseuab4p764ldcunbfsiuj76a.apps.googleusercontent.com",
-              "client_type": 3
-            },
-            {
-              "client_id": "788170634537-1nvdbb46bv71qpjdr0pvrlbsp0kfi4fr.apps.googleusercontent.com",
-              "client_type": 2,
-              "ios_info": {
-                "bundle_id": "com.toktok.toktok"
-              }
-            }
-          ]
-        }
-      }
-    },
-    {
-      "client_info": {
-        "mobilesdk_app_id": "1:788170634537:android:849d5dd5e3b37993547338",
+        "mobilesdk_app_id": "1:816331397345:android:b4a25bdf86fe3bb9163fa0",
         "android_client_info": {
           "package_name": "com.toktok.toktok"
         }
       },
-      "oauth_client": [
-        {
-          "client_id": "788170634537-3qikg30iumf0uet128ln1d0q9feo74a1.apps.googleusercontent.com",
-          "client_type": 1,
-          "android_info": {
-            "package_name": "com.toktok.toktok",
-            "certificate_hash": "8131d7876c22b6cebcd9d6107060cae4926ff508"
-          }
-        },
-        {
-          "client_id": "788170634537-mnsaclmiseuab4p764ldcunbfsiuj76a.apps.googleusercontent.com",
-          "client_type": 3
-        }
-      ],
+      "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyBLmCiYECJNfTUmi5B-nxFMzpYqGfdEcqY"
+          "current_key": "AIzaSyCgolbPE_o3tXKpTGoApKqF6cQkynGFFKo"
         }
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": [
-            {
-              "client_id": "788170634537-mnsaclmiseuab4p764ldcunbfsiuj76a.apps.googleusercontent.com",
-              "client_type": 3
-            },
-            {
-              "client_id": "788170634537-1nvdbb46bv71qpjdr0pvrlbsp0kfi4fr.apps.googleusercontent.com",
-              "client_type": 2,
-              "ios_info": {
-                "bundle_id": "com.toktok.toktok"
-              }
-            }
-          ]
+          "other_platform_oauth_client": []
         }
       }
     }

@@ -11,23 +11,37 @@ class NotificationsCubit extends Cubit<NotificationsState> {
     emit(NotificationsLoading());
     try {
       final notifications = await _repository.getNotifications();
+      if (isClosed) return;
       if (notifications.isEmpty) {
         emit(NotificationsEmpty());
       } else {
         emit(NotificationsLoaded(notifications));
       }
     } catch (e) {
+      if (isClosed) return;
       emit(NotificationsError(e.toString()));
     }
   }
 
   Future<void> markAsRead(String id) async {
-    await _repository.markAsRead(id);
-    await loadNotifications();
+    try {
+      await _repository.markAsRead(id);
+      if (!isClosed) await loadNotifications();
+    } catch (_) {
+      if (!isClosed) {
+        emit(const NotificationsError('تعذر تحديث الإشعار. حاول تاني'));
+      }
+    }
   }
 
   Future<void> clearAll() async {
-    await _repository.clearAll();
-    emit(NotificationsEmpty());
+    try {
+      await _repository.clearAll();
+      if (!isClosed) emit(NotificationsEmpty());
+    } catch (_) {
+      if (!isClosed) {
+        emit(const NotificationsError('تعذر مسح الإشعارات. حاول تاني'));
+      }
+    }
   }
 }

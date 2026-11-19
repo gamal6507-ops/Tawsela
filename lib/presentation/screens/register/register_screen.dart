@@ -38,8 +38,10 @@ class _RegisterScreenState extends State<RegisterScreen>
     _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
       CurvedAnimation(parent: _animationController, curve: Curves.easeOut),
     );
-    _slideAnimation =
-        Tween<Offset>(begin: const Offset(0, 0.3), end: Offset.zero).animate(
+    _slideAnimation = Tween<Offset>(
+      begin: const Offset(0, 0.3),
+      end: Offset.zero,
+    ).animate(
       CurvedAnimation(parent: _animationController, curve: Curves.easeOut),
     );
     _animationController.forward();
@@ -59,11 +61,11 @@ class _RegisterScreenState extends State<RegisterScreen>
   void _onRegister() {
     if (_formKey.currentState?.validate() ?? false) {
       context.read<AuthCubit>().signUpWithEmail(
-            name: _nameController.text.trim(),
-            email: _emailController.text.trim(),
-            phone: _phoneController.text.trim(),
-            password: _passwordController.text,
-          );
+        name: _nameController.text.trim(),
+        email: _emailController.text.trim(),
+        phone: _phoneController.text.trim(),
+        password: _passwordController.text,
+      );
     }
   }
 
@@ -75,8 +77,10 @@ class _RegisterScreenState extends State<RegisterScreen>
           if (state is AuthError) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
-                content: Text(state.message,
-                    style: GoogleFonts.cairo(color: AppColors.textPrimary)),
+                content: Text(
+                  state.message,
+                  style: GoogleFonts.cairo(color: AppColors.textPrimary),
+                ),
                 backgroundColor: AppColors.error,
               ),
             );
@@ -102,9 +106,13 @@ class _RegisterScreenState extends State<RegisterScreen>
                         const SizedBox(height: 24),
                         _buildRegisterButton(),
                         const SizedBox(height: 24),
-                        _buildDivider(),
-                        const SizedBox(height: 24),
-                        _buildSocialButtons(),
+                        if (const bool.fromEnvironment(
+                          'GOOGLE_SIGN_IN_ENABLED',
+                        )) ...[
+                          _buildDivider(),
+                          const SizedBox(height: 24),
+                          _buildSocialButtons(),
+                        ],
                         const SizedBox(height: 28),
                         _buildLoginLink(),
                         const SizedBox(height: 24),
@@ -124,9 +132,7 @@ class _RegisterScreenState extends State<RegisterScreen>
     return Column(
       children: [
         // Logo
-        const Center(
-          child: TawselaLogo(size: 72, showWordmark: true),
-        ),
+        const Center(child: TawselaLogo(size: 72, showWordmark: true)),
         const SizedBox(height: 20),
         Text(
           'إنشاء حساب جديد ✨',
@@ -176,8 +182,9 @@ class _RegisterScreenState extends State<RegisterScreen>
             validator: (value) {
               final trimmed = value?.trim() ?? '';
               if (trimmed.isEmpty) return 'اكتب الإيميل';
-              if (!RegExp(r'^[\w\.\-+]+@([\w\-]+\.)+[\w\-]{2,}$')
-                  .hasMatch(trimmed)) {
+              if (!RegExp(
+                r'^[\w\.\-+]+@([\w\-]+\.)+[\w\-]{2,}$',
+              ).hasMatch(trimmed)) {
                 return 'إيميل مش صحيح';
               }
               return null;
@@ -210,8 +217,8 @@ class _RegisterScreenState extends State<RegisterScreen>
                 color: AppColors.textTertiary,
                 size: 22,
               ),
-              onPressed: () =>
-                  setState(() => _obscurePassword = !_obscurePassword),
+              onPressed:
+                  () => setState(() => _obscurePassword = !_obscurePassword),
             ),
             validator: (value) {
               if (value == null || value.isEmpty) return 'اكتب كلمة السر';
@@ -235,8 +242,10 @@ class _RegisterScreenState extends State<RegisterScreen>
                 color: AppColors.textTertiary,
                 size: 22,
               ),
-              onPressed: () => setState(
-                  () => _obscureConfirmPassword = !_obscureConfirmPassword),
+              onPressed:
+                  () => setState(
+                    () => _obscureConfirmPassword = !_obscureConfirmPassword,
+                  ),
             ),
             validator: (value) {
               if (value == null || value.isEmpty) return 'أكد كلمة السر';
@@ -283,22 +292,23 @@ class _RegisterScreenState extends State<RegisterScreen>
           height: 56,
           child: ElevatedButton(
             onPressed: isLoading ? null : _onRegister,
-            child: isLoading
-                ? const SizedBox(
-                    width: 24,
-                    height: 24,
-                    child: CircularProgressIndicator(
-                      color: Colors.black,
-                      strokeWidth: 2.5,
+            child:
+                isLoading
+                    ? const SizedBox(
+                      width: 24,
+                      height: 24,
+                      child: CircularProgressIndicator(
+                        color: Colors.black,
+                        strokeWidth: 2.5,
+                      ),
+                    )
+                    : Text(
+                      'إنشاء حساب',
+                      style: GoogleFonts.cairo(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
-                  )
-                : Text(
-                    'إنشاء حساب',
-                    style: GoogleFonts.cairo(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
           ),
         );
       },
@@ -329,9 +339,10 @@ class _RegisterScreenState extends State<RegisterScreen>
       builder: (context, state) {
         final isLoading = state is AuthLoading;
         return _buildSocialButton(
-          onPressed: isLoading
-              ? null
-              : () => context.read<AuthCubit>().signInWithGoogle(),
+          onPressed:
+              isLoading
+                  ? null
+                  : () => context.read<AuthCubit>().signInWithGoogle(),
           icon: Icons.g_mobiledata_rounded,
           label: 'التسجيل بجوجل',
           backgroundColor: AppColors.cardBackground,

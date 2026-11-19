@@ -30,9 +30,10 @@ class _SearchingScreenState extends State<SearchingScreen>
       vsync: this,
       duration: const Duration(milliseconds: 1200),
     )..repeat(reverse: true);
-    _scaleAnimation = Tween<double>(begin: 1.0, end: 1.2).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
-    );
+    _scaleAnimation = Tween<double>(
+      begin: 1.0,
+      end: 1.2,
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOut));
     _timer = Timer.periodic(const Duration(seconds: 1), (t) {
       setState(() => _seconds++);
     });
@@ -48,10 +49,17 @@ class _SearchingScreenState extends State<SearchingScreen>
   @override
   Widget build(BuildContext context) {
     return BlocListener<RideBookingBloc, RideBookingState>(
-      listenWhen: (prev, curr) => prev is SearchingDriver && (curr is DriverFoundState || curr is RideBookingInitial),
+      listenWhen:
+          (prev, curr) =>
+              curr is DriverFoundState ||
+              curr is RideInProgress ||
+              curr is RideArrivedState ||
+              curr is RideBookingInitial,
       listener: (context, state) {
-        if (state is DriverFoundState) {
-          context.push('/driver-found');
+        if (state is DriverFoundState || state is RideInProgress) {
+          context.go('/driver-found');
+        } else if (state is RideArrivedState) {
+          context.go('/arrival');
         } else if (state is RideBookingInitial) {
           context.go('/home');
         }
@@ -88,9 +96,10 @@ class _SearchingScreenState extends State<SearchingScreen>
                                 builder: (context) {
                                   final bookingState =
                                       context.watch<RideBookingBloc>().state;
-                                  final icon = bookingState is SearchingDriver
-                                      ? bookingState.rideType.icon
-                                      : '🚗';
+                                  final icon =
+                                      bookingState is SearchingDriver
+                                          ? bookingState.rideType.icon
+                                          : '🚗';
                                   return Text(
                                     icon,
                                     style: const TextStyle(fontSize: 50),
@@ -118,9 +127,34 @@ class _SearchingScreenState extends State<SearchingScreen>
                           ),
                         ),
                         const SizedBox(height: 40),
-                        _buildInfoCard('🛡️', 'رحلتك متأمنة'),
+                        _buildInfoCard('💵', 'الدفع كاش عند الوصول'),
                         const SizedBox(height: 12),
-                        _buildInfoCard('🎧', 'خدمة عملاء 24/7'),
+                        _buildInfoCard('📍', 'انتظار قبول سائق معتمد'),
+                        BlocBuilder<RideBookingBloc, RideBookingState>(
+                          builder:
+                              (context, state) =>
+                                  state is RideBookingError
+                                      ? Padding(
+                                        padding: const EdgeInsets.all(16),
+                                        child: Column(
+                                          children: [
+                                            Text(state.message),
+                                            TextButton(
+                                              onPressed:
+                                                  () => context
+                                                      .read<RideBookingBloc>()
+                                                      .add(
+                                                        const RestoreBooking(),
+                                                      ),
+                                              child: const Text(
+                                                'استعادة الطلب',
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      )
+                                      : const SizedBox.shrink(),
+                        ),
                       ],
                     ),
                   ),
@@ -132,14 +166,15 @@ class _SearchingScreenState extends State<SearchingScreen>
                   child: GestureDetector(
                     onTap: () {
                       context.read<RideBookingBloc>().add(BookingCancelled());
-                      context.go('/home');
                     },
                     child: Container(
                       padding: const EdgeInsets.all(16),
                       decoration: BoxDecoration(
                         color: AppColors.error.withValues(alpha: 0.15),
                         borderRadius: BorderRadius.circular(16),
-                        border: Border.all(color: AppColors.error.withValues(alpha: 0.3)),
+                        border: Border.all(
+                          color: AppColors.error.withValues(alpha: 0.3),
+                        ),
                       ),
                       child: Text(
                         'إلغاء البحث',

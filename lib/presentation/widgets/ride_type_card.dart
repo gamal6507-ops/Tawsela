@@ -23,9 +23,10 @@ class RideTypeCard extends StatelessWidget {
         duration: const Duration(milliseconds: 200),
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: isSelected
-              ? AppColors.accent.withValues(alpha: 0.15)
-              : AppColors.cardBackground,
+          color:
+              isSelected
+                  ? AppColors.accent.withValues(alpha: 0.15)
+                  : AppColors.cardBackground,
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
             color: isSelected ? AppColors.accent : AppColors.border,
@@ -53,7 +54,10 @@ class RideTypeCard extends StatelessWidget {
                       if (option.suffix != null) ...[
                         const SizedBox(width: 6),
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 2,
+                          ),
                           decoration: BoxDecoration(
                             color: AppColors.accent,
                             borderRadius: BorderRadius.circular(8),
@@ -72,7 +76,7 @@ class RideTypeCard extends StatelessWidget {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    '${option.etaMinutes} دقائق',
+                    '${option.price} ج • انتظار قبول السائق',
                     style: GoogleFonts.cairo(
                       fontSize: 13,
                       color: AppColors.textSecondary,
@@ -87,22 +91,24 @@ class RideTypeCard extends StatelessWidget {
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 border: Border.all(
-                  color: isSelected ? AppColors.accent : AppColors.textSecondary,
+                  color:
+                      isSelected ? AppColors.accent : AppColors.textSecondary,
                   width: 2,
                 ),
               ),
-              child: isSelected
-                  ? Center(
-                      child: Container(
-                        width: 10,
-                        height: 10,
-                        decoration: const BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: AppColors.accent,
+              child:
+                  isSelected
+                      ? Center(
+                        child: Container(
+                          width: 10,
+                          height: 10,
+                          decoration: const BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: AppColors.accent,
+                          ),
                         ),
-                      ),
-                    )
-                  : null,
+                      )
+                      : null,
             ),
           ],
         ),

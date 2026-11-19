@@ -31,27 +31,32 @@ import 'package:toktok/presentation/blocs/promo_codes/promo_codes_cubit.dart';
 import 'package:toktok/presentation/blocs/ride_booking/ride_booking_bloc.dart';
 import 'package:toktok/presentation/blocs/trip_history/trip_history_cubit.dart';
 import 'package:toktok/presentation/blocs/rating/rating_cubit.dart';
+import 'package:toktok/presentation/screens/driver/driver_screen.dart';
+import 'package:toktok/presentation/screens/chat/chat_screen.dart';
+import 'package:toktok/presentation/screens/settings/settings_screen.dart';
 
 final GlobalKey<NavigatorState> _rootNavigatorKey = GlobalKey<NavigatorState>();
-final GlobalKey<NavigatorState> _shellNavigatorKey = GlobalKey<NavigatorState>();
+final GlobalKey<NavigatorState> _shellNavigatorKey =
+    GlobalKey<NavigatorState>();
 
-GoRouter createRouter(AuthCubit authCubit) {
+GoRouter createRouter(AuthCubit authCubit, {required Listenable authNotifier}) {
   return GoRouter(
     navigatorKey: _rootNavigatorKey,
     initialLocation: '/splash',
-    refreshListenable: _AuthCubitNotifier(authCubit),
+    refreshListenable: authNotifier,
     redirect: (context, state) {
       if (state.matchedLocation == '/splash') {
         return null;
       }
       final authState = authCubit.state;
-      final isAuthenticated = authState is Authenticated;
-      final isAuthRoute = state.matchedLocation == '/login' ||
+      final isAuthenticated = authCubit.currentUser != null;
+      final isAuthRoute =
+          state.matchedLocation == '/login' ||
           state.matchedLocation == '/register';
 
       // Still loading auth state - don't redirect
       if (authState is AuthInitial || authState is AuthLoading) {
-        return null;
+        return !isAuthenticated && !isAuthRoute ? '/splash' : null;
       }
 
       // Not authenticated and not on auth route -> go to login
@@ -67,6 +72,24 @@ GoRouter createRouter(AuthCubit authCubit) {
       return null;
     },
     routes: [
+      GoRoute(
+        path: '/driver',
+        builder: (context, state) => const DriverScreen(),
+      ),
+      GoRoute(
+        path: '/chat/:id',
+        builder:
+            (context, state) =>
+                ChatScreen(requestId: state.pathParameters['id']!),
+      ),
+      GoRoute(
+        path: '/settings',
+        builder: (context, state) => const SettingsScreen(),
+      ),
+      GoRoute(
+        path: '/support',
+        builder: (context, state) => const SupportScreen(),
+      ),
       GoRoute(
         path: '/splash',
         parentNavigatorKey: _rootNavigatorKey,
@@ -87,133 +110,156 @@ GoRouter createRouter(AuthCubit authCubit) {
       // Main app routes
       ShellRoute(
         navigatorKey: _shellNavigatorKey,
-        builder: (context, state, child) => BlocProvider.value(
-          value: context.read<RideBookingBloc>(),
-          child: ShellScreen(child: child),
-        ),
+        builder:
+            (context, state, child) => BlocProvider.value(
+              value: context.read<RideBookingBloc>(),
+              child: ShellScreen(child: child),
+            ),
         routes: [
           GoRoute(
             path: '/home',
-            pageBuilder: (context, state) => const NoTransitionPage(
-              child: HomeScreen(),
-            ),
+            pageBuilder:
+                (context, state) => NoTransitionPage(
+                  child: HomeScreen(
+                    initialFrom:
+                        (state.extra is Map
+                                ? (state.extra as Map)['from']
+                                : null)
+                            as String?,
+                    initialTo:
+                        (state.extra is Map ? (state.extra as Map)['to'] : null)
+                            as String?,
+                  ),
+                ),
           ),
           GoRoute(
             path: '/trips',
-            pageBuilder: (context, state) => NoTransitionPage(
-              child: BlocProvider.value(
-                value: context.read<TripHistoryCubit>(),
-                child: const TripHistoryScreen(),
-              ),
-            ),
+            pageBuilder:
+                (context, state) => NoTransitionPage(
+                  child: BlocProvider.value(
+                    value: context.read<TripHistoryCubit>(),
+                    child: const TripHistoryScreen(),
+                  ),
+                ),
           ),
           GoRoute(
             path: '/wallet',
-            pageBuilder: (context, state) => NoTransitionPage(
-              child: BlocProvider.value(
-                value: context.read<WalletCubit>(),
-                child: const WalletScreen(),
-              ),
-            ),
+            pageBuilder:
+                (context, state) => NoTransitionPage(
+                  child: BlocProvider.value(
+                    value: context.read<WalletCubit>(),
+                    child: const WalletScreen(),
+                  ),
+                ),
           ),
           GoRoute(
             path: '/profile',
-            pageBuilder: (context, state) => NoTransitionPage(
-              child: BlocProvider.value(
-                value: context.read<ProfileCubit>(),
-                child: const ProfileScreen(),
-              ),
-            ),
+            pageBuilder:
+                (context, state) => NoTransitionPage(
+                  child: BlocProvider.value(
+                    value: context.read<ProfileCubit>(),
+                    child: const ProfileScreen(),
+                  ),
+                ),
           ),
         ],
       ),
       GoRoute(
         path: '/choose-ride',
         parentNavigatorKey: _rootNavigatorKey,
-        builder: (context, state) => BlocProvider.value(
-          value: context.read<RideBookingBloc>(),
-          child: const ChooseRideScreen(),
-        ),
+        builder:
+            (context, state) => BlocProvider.value(
+              value: context.read<RideBookingBloc>(),
+              child: const ChooseRideScreen(),
+            ),
       ),
       GoRoute(
         path: '/searching',
         parentNavigatorKey: _rootNavigatorKey,
-        builder: (context, state) => BlocProvider.value(
-          value: context.read<RideBookingBloc>(),
-          child: const SearchingScreen(),
-        ),
+        builder:
+            (context, state) => BlocProvider.value(
+              value: context.read<RideBookingBloc>(),
+              child: const SearchingScreen(),
+            ),
       ),
       GoRoute(
         path: '/driver-found',
         parentNavigatorKey: _rootNavigatorKey,
-        builder: (context, state) => BlocProvider.value(
-          value: context.read<RideBookingBloc>(),
-          child: const DriverFoundScreen(),
-        ),
+        builder:
+            (context, state) => BlocProvider.value(
+              value: context.read<RideBookingBloc>(),
+              child: const DriverFoundScreen(),
+            ),
       ),
       GoRoute(
         path: '/arrival',
         parentNavigatorKey: _rootNavigatorKey,
-        builder: (context, state) => MultiBlocProvider(
-          providers: [
-            BlocProvider.value(value: context.read<RideBookingBloc>()),
-            BlocProvider.value(value: context.read<RatingCubit>()),
-          ],
-          child: const ArrivalScreen(),
-        ),
+        builder:
+            (context, state) => MultiBlocProvider(
+              providers: [
+                BlocProvider.value(value: context.read<RideBookingBloc>()),
+                BlocProvider.value(value: context.read<RatingCubit>()),
+              ],
+              child: const ArrivalScreen(),
+            ),
       ),
       GoRoute(
         path: '/rate-trip',
         parentNavigatorKey: _rootNavigatorKey,
-        builder: (context, state) => MultiBlocProvider(
-          providers: [
-            BlocProvider.value(value: context.read<RideBookingBloc>()),
-            BlocProvider.value(value: context.read<RatingCubit>()),
-          ],
-          child: const RateTripScreen(),
-        ),
+        builder:
+            (context, state) => MultiBlocProvider(
+              providers: [
+                BlocProvider.value(value: context.read<RideBookingBloc>()),
+                BlocProvider.value(value: context.read<RatingCubit>()),
+              ],
+              child: const RateTripScreen(),
+            ),
       ),
       GoRoute(
         path: '/add-credit',
         parentNavigatorKey: _rootNavigatorKey,
-        builder: (context, state) => BlocProvider.value(
-          value: context.read<WalletCubit>(),
-          child: const AddCreditScreen(),
-        ),
+        builder:
+            (context, state) => BlocProvider.value(
+              value: context.read<WalletCubit>(),
+              child: const AddCreditScreen(),
+            ),
       ),
       GoRoute(
         path: '/promo-codes',
         parentNavigatorKey: _rootNavigatorKey,
-        builder: (context, state) => BlocProvider.value(
-          value: context.read<PromoCodesCubit>(),
-          child: const PromoCodesScreen(),
-        ),
+        builder:
+            (context, state) => BlocProvider.value(
+              value: context.read<PromoCodesCubit>(),
+              child: const PromoCodesScreen(),
+            ),
       ),
       GoRoute(
         path: '/edit-profile',
         parentNavigatorKey: _rootNavigatorKey,
-        builder: (context, state) => BlocProvider.value(
-          value: context.read<ProfileCubit>(),
-          child: const EditProfileScreen(),
-        ),
+        builder:
+            (context, state) => BlocProvider.value(
+              value: context.read<ProfileCubit>(),
+              child: const EditProfileScreen(),
+            ),
       ),
       GoRoute(
         path: '/notifications',
         parentNavigatorKey: _rootNavigatorKey,
-        builder: (context, state) => BlocProvider.value(
-          value: context.read<NotificationsCubit>(),
-          child: const NotificationsScreen(),
-        ),
+        builder:
+            (context, state) => BlocProvider.value(
+              value: context.read<NotificationsCubit>(),
+              child: const NotificationsScreen(),
+            ),
       ),
     ],
   );
 }
 
 /// Bridges AuthCubit stream to a ChangeNotifier for GoRouter's refreshListenable
-class _AuthCubitNotifier extends ChangeNotifier {
+class AuthCubitNotifier extends ChangeNotifier {
   late final StreamSubscription<AuthState> _subscription;
 
-  _AuthCubitNotifier(AuthCubit cubit) {
+  AuthCubitNotifier(AuthCubit cubit) {
     _subscription = cubit.stream.listen((_) => notifyListeners());
   }
 

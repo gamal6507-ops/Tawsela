@@ -28,17 +28,24 @@ class SelectingRide extends RideBookingState {
     required this.to,
     required this.rideOptions,
     this.selectedType = RideType.car,
-    this.selectedPayment = PaymentMethod.wallet,
+    this.selectedPayment = PaymentMethod.cash,
     this.selectedPrice = 25,
     this.pickupLatLng,
     this.dropoffLatLng,
     this.distanceKm,
+    this.isSubmitting = false,
+    this.error,
   });
+
+  final bool isSubmitting;
+  final String? error;
 
   SelectingRide copyWith({
     RideType? selectedType,
     PaymentMethod? selectedPayment,
     int? selectedPrice,
+    bool? isSubmitting,
+    String? error,
   }) {
     return SelectingRide(
       from: from,
@@ -50,21 +57,25 @@ class SelectingRide extends RideBookingState {
       pickupLatLng: pickupLatLng,
       dropoffLatLng: dropoffLatLng,
       distanceKm: distanceKm,
+      isSubmitting: isSubmitting ?? this.isSubmitting,
+      error: error,
     );
   }
 
   @override
   List<Object?> get props => [
-        from,
-        to,
-        rideOptions,
-        selectedType,
-        selectedPayment,
-        selectedPrice,
-        pickupLatLng,
-        dropoffLatLng,
-        distanceKm,
-      ];
+    from,
+    to,
+    rideOptions,
+    selectedType,
+    selectedPayment,
+    selectedPrice,
+    pickupLatLng,
+    dropoffLatLng,
+    distanceKm,
+    isSubmitting,
+    error,
+  ];
 }
 
 class SearchingDriver extends RideBookingState {
@@ -92,16 +103,16 @@ class SearchingDriver extends RideBookingState {
 
   @override
   List<Object?> get props => [
-        from,
-        to,
-        rideType,
-        price,
-        paymentMethod,
-        requestId,
-        pickupLatLng,
-        dropoffLatLng,
-        distanceKm,
-      ];
+    from,
+    to,
+    rideType,
+    price,
+    paymentMethod,
+    requestId,
+    pickupLatLng,
+    dropoffLatLng,
+    distanceKm,
+  ];
 }
 
 class DriverFoundState extends RideBookingState {
@@ -131,17 +142,17 @@ class DriverFoundState extends RideBookingState {
 
   @override
   List<Object?> get props => [
-        from,
-        to,
-        driver,
-        rideType,
-        price,
-        paymentMethod,
-        requestId,
-        pickupLatLng,
-        dropoffLatLng,
-        distanceKm,
-      ];
+    from,
+    to,
+    driver,
+    rideType,
+    price,
+    paymentMethod,
+    requestId,
+    pickupLatLng,
+    dropoffLatLng,
+    distanceKm,
+  ];
 }
 
 class RideInProgress extends RideBookingState {
@@ -171,17 +182,17 @@ class RideInProgress extends RideBookingState {
 
   @override
   List<Object?> get props => [
-        from,
-        to,
-        driver,
-        rideType,
-        price,
-        paymentMethod,
-        requestId,
-        pickupLatLng,
-        dropoffLatLng,
-        distanceKm,
-      ];
+    from,
+    to,
+    driver,
+    rideType,
+    price,
+    paymentMethod,
+    requestId,
+    pickupLatLng,
+    dropoffLatLng,
+    distanceKm,
+  ];
 }
 
 class RideArrivedState extends RideBookingState {
@@ -213,18 +224,18 @@ class RideArrivedState extends RideBookingState {
 
   @override
   List<Object?> get props => [
-        from,
-        to,
-        driver,
-        rideType,
-        price,
-        paymentMethod,
-        requestId,
-        pickupLatLng,
-        dropoffLatLng,
-        distanceKm,
-        durationMinutes,
-      ];
+    from,
+    to,
+    driver,
+    rideType,
+    price,
+    paymentMethod,
+    requestId,
+    pickupLatLng,
+    dropoffLatLng,
+    distanceKm,
+    durationMinutes,
+  ];
 }
 
 class RideBookingError extends RideBookingState {

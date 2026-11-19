@@ -12,19 +12,24 @@ class ProfileCubit extends Cubit<ProfileState> {
     emit(ProfileLoading());
     try {
       final user = await _profileRepository.getProfile();
+      if (isClosed) return;
       emit(ProfileLoaded(user));
     } catch (e) {
+      if (isClosed) return;
       emit(ProfileError(e.toString()));
     }
   }
 
   Future<void> updateProfile(User user) async {
-    final current = state is ProfileLoaded ? (state as ProfileLoaded).user : null;
+    final current =
+        state is ProfileLoaded ? (state as ProfileLoaded).user : null;
     if (current != null) emit(ProfileSaving(current));
     try {
       final updated = await _profileRepository.updateProfile(user);
+      if (isClosed) return;
       emit(ProfileSaved(updated));
     } catch (e) {
+      if (isClosed) return;
       emit(ProfileError(e.toString()));
     }
   }

@@ -39,7 +39,7 @@ class Transaction extends Equatable {
     return Transaction(
       id: map['id'] as String,
       title: map['title'] as String,
-      amount: map['amount'] as double,
+      amount: (map['amount'] as num).toDouble(),
       type: TransactionType.values.byName(map['type']),
       date: DateTime.fromMillisecondsSinceEpoch(map['date'] as int),
       subtitle: map['subtitle'] != null ? map['subtitle'] as String : null,

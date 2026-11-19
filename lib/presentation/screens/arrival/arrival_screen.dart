@@ -7,6 +7,7 @@ import 'package:toktok/presentation/blocs/ride_booking/ride_booking_bloc.dart';
 import 'package:toktok/presentation/blocs/ride_booking/ride_booking_event.dart';
 import 'package:toktok/presentation/blocs/ride_booking/ride_booking_state.dart';
 import 'package:toktok/domain/models/trip.dart';
+import 'package:toktok/presentation/blocs/rating/rating_cubit.dart';
 
 class ArrivalScreen extends StatelessWidget {
   const ArrivalScreen({super.key});
@@ -22,8 +23,27 @@ class ArrivalScreen extends StatelessWidget {
       child: Scaffold(
         body: BlocBuilder<RideBookingBloc, RideBookingState>(
           builder: (context, state) {
+            if (state is RideBookingError) {
+              return Center(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(state.message),
+                    TextButton(
+                      onPressed:
+                          () => context.read<RideBookingBloc>().add(
+                            const RestoreBooking(),
+                          ),
+                      child: const Text('استعادة الرحلة'),
+                    ),
+                  ],
+                ),
+              );
+            }
             if (state is! RideArrivedState) {
-              return const Center(child: CircularProgressIndicator(color: AppColors.accent));
+              return const Center(
+                child: CircularProgressIndicator(color: AppColors.accent),
+              );
             }
             return Center(
               child: ConstrainedBox(
@@ -40,7 +60,11 @@ class ArrivalScreen extends StatelessWidget {
                           color: AppColors.success,
                           shape: BoxShape.circle,
                         ),
-                        child: const Icon(Icons.check_rounded, color: Colors.white, size: 50),
+                        child: const Icon(
+                          Icons.check_rounded,
+                          color: Colors.white,
+                          size: 50,
+                        ),
                       ),
                       const SizedBox(height: 24),
                       Text(
@@ -61,18 +85,31 @@ class ArrivalScreen extends StatelessWidget {
                         height: 56,
                         child: ElevatedButton(
                           onPressed: () {
+                            context.read<RatingCubit>().reset();
                             context.push('/rate-trip');
                           },
-                          child: Text('قيم الرحلة', style: GoogleFonts.cairo(fontSize: 18, fontWeight: FontWeight.bold)),
+                          child: Text(
+                            'قيم الرحلة',
+                            style: GoogleFonts.cairo(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
                         ),
                       ),
                       const SizedBox(height: 12),
                       TextButton(
                         onPressed: () {
-                          context.read<RideBookingBloc>().add(BookingCancelled());
-                          context.go('/home');
+                          context.read<RideBookingBloc>().add(
+                            const RideCompleted(),
+                          );
                         },
-                        child: Text('تخطي', style: GoogleFonts.cairo(color: AppColors.textSecondary)),
+                        child: Text(
+                          'تخطي',
+                          style: GoogleFonts.cairo(
+                            color: AppColors.textSecondary,
+                          ),
+                        ),
                       ),
                     ],
                   ),
@@ -95,11 +132,18 @@ class ArrivalScreen extends StatelessWidget {
       ),
       child: Column(
         children: [
-          _buildDetailRow('المسافة', '${state.distanceKm.toStringAsFixed(1)} كم'),
+          _buildDetailRow(
+            'المسافة',
+            '${state.distanceKm.toStringAsFixed(1)} كم',
+          ),
           const Divider(color: AppColors.border),
           _buildDetailRow('المدة', '${state.durationMinutes} دقيقة'),
           const Divider(color: AppColors.border),
-          _buildDetailRow('الإجمالي', '${state.price} ج', valueColor: AppColors.accent),
+          _buildDetailRow(
+            'الإجمالي',
+            '${state.price} ج',
+            valueColor: AppColors.accent,
+          ),
         ],
       ),
     );
@@ -111,7 +155,13 @@ class ArrivalScreen extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(label, style: GoogleFonts.cairo(fontSize: 15, color: AppColors.textSecondary)),
+          Text(
+            label,
+            style: GoogleFonts.cairo(
+              fontSize: 15,
+              color: AppColors.textSecondary,
+            ),
+          ),
           Text(
             value,
             style: GoogleFonts.cairo(
@@ -135,15 +185,14 @@ class ArrivalScreen extends StatelessWidget {
       ),
       child: Row(
         children: [
-          Icon(
-            method == PaymentMethod.wallet ? Icons.account_balance_wallet : Icons.credit_card,
-            color: AppColors.accent,
-            size: 22,
-          ),
+          Icon(Icons.payments_outlined, color: AppColors.accent, size: 22),
           const SizedBox(width: 10),
           Text(
-            method == PaymentMethod.wallet ? 'تم الدفع من المحفظة' : 'تم الدفع بالبطاقة',
-            style: GoogleFonts.cairo(fontSize: 14, color: AppColors.textSecondary),
+            'الأجرة كاش • ادفع للسائق عند الوصول',
+            style: GoogleFonts.cairo(
+              fontSize: 14,
+              color: AppColors.textSecondary,
+            ),
           ),
         ],
       ),

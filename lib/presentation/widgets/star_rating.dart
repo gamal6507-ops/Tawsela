@@ -26,8 +26,13 @@ class StarRating extends StatelessWidget {
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 2),
             child: Icon(
-              starNumber <= rating ? Icons.star_rounded : Icons.star_border_rounded,
-              color: starNumber <= rating ? AppColors.accent : AppColors.textTertiary,
+              starNumber <= rating
+                  ? Icons.star_rounded
+                  : Icons.star_border_rounded,
+              color:
+                  starNumber <= rating
+                      ? AppColors.accent
+                      : AppColors.textTertiary,
               size: size,
             ),
           ),
