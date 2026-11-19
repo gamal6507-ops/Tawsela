@@ -26,4 +26,4 @@ No store/mobile binaries tested. Android production signing must be provided by 
 
 ## Publication
 
-Pending final build and verified GitHub/Vercel publication.
+The [GitHub Actions release checks](https://github.com/gamal6507-ops/Tawsela/actions/runs/44501956075) passed for commit `511f552` on `main`. Vercel published this commit to [Tawsela](https://tawsela-kappa.vercel.app). The public homepage, Flutter bootstrap, main JavaScript bundle and nested route responded successfully. The geocoding API returned Cairo coordinates for a valid query and HTTP 400 for a one-character query. The public hostname was verified in Firebase Auth's authorized domains. These HTTP checks do not exercise a full two-user ride in a browser.
