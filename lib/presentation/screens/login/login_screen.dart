@@ -218,6 +218,7 @@ class _LoginScreenState extends State<LoginScreen>
             icon: Icons.lock_outline,
             obscure: _obscurePassword,
             suffixIcon: IconButton(
+              tooltip: _obscurePassword ? 'إظهار كلمة السر' : 'إخفاء كلمة السر',
               icon: Icon(
                 _obscurePassword
                     ? Icons.visibility_off_outlined

@@ -210,6 +210,7 @@ class _RegisterScreenState extends State<RegisterScreen>
             icon: Icons.lock_outline,
             obscure: _obscurePassword,
             suffixIcon: IconButton(
+              tooltip: _obscurePassword ? 'إظهار كلمة السر' : 'إخفاء كلمة السر',
               icon: Icon(
                 _obscurePassword
                     ? Icons.visibility_off_outlined
@@ -235,6 +236,10 @@ class _RegisterScreenState extends State<RegisterScreen>
             icon: Icons.lock_outline,
             obscure: _obscureConfirmPassword,
             suffixIcon: IconButton(
+              tooltip:
+                  _obscureConfirmPassword
+                      ? 'إظهار تأكيد كلمة السر'
+                      : 'إخفاء تأكيد كلمة السر',
               icon: Icon(
                 _obscureConfirmPassword
                     ? Icons.visibility_off_outlined
