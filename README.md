@@ -86,3 +86,14 @@ Google Sign-In جاهز جزئيًا في الكود لكنه مخفي ومعط�
 ## حدود الإصدار
 
 لا يوجد اعتماد هوية آلي، تأمين رحلات، دعم فوري، خدمة طوارئ، دفع إلكتروني، أو أسطول سائقين جاهز. Android يحتاج توقيع إصدار يملكه المشغّل؛ أُزيل توقيع Debug من Release. إصدارات المتاجر وmacOS/Windows غير مختبرة، والهدف الحالي الويب. لا ترسل بيانات شخصية أو أسرارًا في [بلاغات GitHub العامة](https://github.com/gamal6507-ops/Tawsela/issues).
+
+---
+
+## Developer & contact
+
+**Ahmed Gamal Saeed** — Software Developer focused on Flutter and modern web applications.
+
+- [Portfolio — selected projects and demos](https://ahmed-gamal-portfolio-alpha.vercel.app/)
+- [LinkedIn — professional profile](https://www.linkedin.com/in/ahmed-gamal-717b54450/)
+- [GitHub — source code](https://github.com/gamal6507-ops)
+
