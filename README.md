@@ -1,5 +1,16 @@
 # توصيلة — Tawsela
 
+**Flutter ride-booking application for Egypt**, with distinct rider and driver experiences, Firebase-backed authentication and data, maps, booking flow, ride history, and English/Arabic interface support.
+
+**Explore:** [Live web demo](https://tawsela-kappa.vercel.app/) · [Screenshots in my portfolio](https://ahmed-gamal-portfolio-alpha.vercel.app/#work)
+
+> **Demo note:** Some flows require sign-in. Rides use cash on arrival; map distance/routes are approximate, and driver approval is a manual operational step. Do not place real ride requests merely to review the demo.
+
+**Core technologies:** Flutter, Dart, Firebase/Firestore, OpenStreetMap, Vercel.
+
+---
+
+
 تطبيق Flutter عربي لحجز رحلات داخل مصر مع واجهة سائق. هذه النسخة تستخدم **الدفع كاش عند الوصول**؛ لا توجد محفظة وهمية أو شحن أو بطاقات أو خصومات مفعّلة.
 
 ## التشغيل
